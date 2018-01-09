@@ -18,8 +18,9 @@ int db_get_flight_dim(const char * flight_number, int dim[2]);
 int db_remove_flight(const char * flight_number);
 int db_get_reservations_quantity(const char * flight_number);
 int db_get_reservations(const char * flight_number, reservation_t * reservations);
+int db_get_cancellations_quantity(const char * flight_number);
+int db_get_cancellations(const char * flight_number, reservation_t * cancellations);
 int db_book_seat(reservation_t * reservation);
-
 int db_exists_reservation(reservation_t * reservation);
 int db_cancel_seat(reservation_t * reservation);
 

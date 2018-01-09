@@ -13,8 +13,11 @@ int db_open()
   int code;
 
   code = sqlite3_open(DB_FILE_NAME, &db_connection);
+
   if(code != SQLITE_OK)
     return DB_ERROR;
+
+  sqlite3_db_config(db_connection, SQLITE_DBCONFIG_ENABLE_FKEY, 1, NULL);
   return DB_OK;
 }
 
@@ -146,14 +149,18 @@ int db_get_reservations_quantity(const char * flight_number)
   char * query;
   sqlite3_stmt * statement;
 
-  query = "select count(*) from reservation where flight_number = ?;";
+  if(flight_number != NULL)
+    query = "select count(*) from reservation where flight_number = ?;";
+  else
+    query = "select count(*) from reservation;";
 
   code = sqlite3_prepare_v2(db_connection, query, -1, &statement, NULL);
 
   if(code != SQLITE_OK)
     return DB_ERROR;
 
-  sqlite3_bind_text(statement, 1, flight_number, -1, NULL);
+  if(flight_number != NULL)
+    sqlite3_bind_text(statement, 1, flight_number, -1, NULL);
 
   code = sqlite3_step(statement);
 
@@ -201,20 +208,89 @@ int db_get_reservations(const char * flight_number, reservation_t * reservations
   char * query;
   sqlite3_stmt * statement;
 
-  query = "select * from reservation where flight_number = ?;";
-
+  if(flight_number != NULL)
+    query = "select * from reservation where flight_number = ?;";
+  else
+    query = "select * from reservation;";
   code = sqlite3_prepare_v2(db_connection, query, -1, &statement, NULL);
 
   if(code != SQLITE_OK)
     return DB_ERROR;
 
-  sqlite3_bind_text(statement, 1, flight_number, -1, NULL);
+  if(flight_number != NULL)
+    sqlite3_bind_text(statement, 1, flight_number, -1, NULL);
 
   while((code = sqlite3_step(statement)) == SQLITE_ROW) {
     strcpy(reservations[i].flight_number, (const char *)sqlite3_column_text(statement, 0));
     reservations[i].seat_row = sqlite3_column_int(statement, 1);
     reservations[i].seat_col = sqlite3_column_int(statement, 2);
     reservations[i].dni = sqlite3_column_int(statement, 3);
+    i++;
+  }
+  sqlite3_finalize(statement);
+
+  if(code == SQLITE_ERROR)
+    return DB_WRONG_RESULT;
+  if(code != SQLITE_DONE)
+    return DB_ERROR;
+  return DB_OK;
+}
+
+int db_get_cancellations_quantity(const char * flight_number)
+{
+  int code, quantity;
+  char * query;
+  sqlite3_stmt * statement;
+
+  if(flight_number != NULL)
+    query = "select count(*) from cancellation where flight_number = ?;";
+  else
+    query = "select count(*) from cancellation;";
+
+  code = sqlite3_prepare_v2(db_connection, query, -1, &statement, NULL);
+
+  if(code != SQLITE_OK)
+    return DB_ERROR;
+
+  if(flight_number != NULL)
+    sqlite3_bind_text(statement, 1, flight_number, -1, NULL);
+
+  code = sqlite3_step(statement);
+
+  if(code == SQLITE_ERROR)
+    return DB_WRONG_RESULT;
+  if(code != SQLITE_DONE && code != SQLITE_ROW)
+    return DB_ERROR;
+
+  quantity = sqlite3_column_int(statement, 0);
+  sqlite3_finalize(statement);
+  return quantity;
+}
+
+int db_get_cancellations(const char * flight_number, reservation_t * cancellations)
+{
+  int code;
+  int i = 0;
+  char * query;
+  sqlite3_stmt * statement;
+
+  if(flight_number != NULL)
+    query = "select * from cancellation where flight_number = ?;";
+  else
+    query = "select * from cancellation;";
+  code = sqlite3_prepare_v2(db_connection, query, -1, &statement, NULL);
+
+  if(code != SQLITE_OK)
+    return DB_ERROR;
+
+  if(flight_number != NULL)
+    sqlite3_bind_text(statement, 1, flight_number, -1, NULL);
+
+  while((code = sqlite3_step(statement)) == SQLITE_ROW) {
+    strcpy(cancellations[i].flight_number, (const char *)sqlite3_column_text(statement, 0));
+    cancellations[i].seat_row = sqlite3_column_int(statement, 1);
+    cancellations[i].seat_col = sqlite3_column_int(statement, 2);
+    cancellations[i].dni = sqlite3_column_int(statement, 3);
     i++;
   }
   sqlite3_finalize(statement);

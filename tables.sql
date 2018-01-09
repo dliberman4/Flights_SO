@@ -9,7 +9,7 @@ create table reservation(
   seat_col integer,
   dni integer,
   primary key (flight_number, seat_row, seat_col),
-  foreign key (flight_number) references flight
+  foreign key (flight_number) references flight on delete cascade
 );
 
 create table cancellation(
@@ -18,5 +18,5 @@ create table cancellation(
   seat_col integer,
   dni integer,
   primary key (flight_number, seat_row, seat_col, dni),
-  foreign key (flight_number) references flight
+  foreign key (flight_number) references flight on delete cascade
 );
