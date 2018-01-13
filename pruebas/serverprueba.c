@@ -22,12 +22,12 @@ int main()
   address.sin_family = PF_INET;
   address.sin_port = htons(2000);
 
-  if(INADOR_ANY)
-    address.sin_addr.s_addr = htonl(INADOR_ANY);
+  if(INADDR_ANY)
+    address.sin_addr.s_addr = htonl(INADDR_ANY);
 
   /*evitar problemas de reutilizacion del puerto*/
   reuse = 1;
-  setsockopt(listener_socket, SQL_SOCKET, SO_REUSEADDR, (char *) reuse, sizeof(int));
+  setsockopt(listener_socket, SOL_SOCKET, SO_REUSEADDR, (char *) reuse, sizeof(int));
 
   if(bind(listener_socket, (struct sockaddr *) &address, sizeof(address)) == -1) {
     printf("error en bind\n");
