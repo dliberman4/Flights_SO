@@ -35,7 +35,7 @@ int main()
       return 3;
       break;
     default:
-      close(s);
+      close(listening_socket);
       return 0;
       break;
     case 0:
@@ -64,10 +64,17 @@ void new_server(int accepted_socket)
       break;
     default:
       //sigue listening
+      close(accepted_socket);
       return;
       break;
     case 0:
       //sirvo al cliente
+      close(listening_socket);
 
   }
+}
+
+int recieve_from_client(int recieving_socket)
+{
+
 }

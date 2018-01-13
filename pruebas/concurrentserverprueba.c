@@ -1,19 +1,26 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/signal.h>
+#include <sys/wait.h>
 #include <netinet/in.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+
+void sigchld_handler(int sig);
 
 int main()
 {
   int listener_socket;
   int accepted_socket;
   int address_size;
-  int reuse;
+  char * reuse;
   struct sockaddr_in address;
   struct sockaddr_storage client;
+
+  signal(SIGCHLD, sigchld_handler);
 
   if((listener_socket = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
     printf("error al crear el socket\n");
@@ -28,7 +35,7 @@ int main()
     address.sin_addr.s_addr = htonl(INADDR_ANY);
 
   /*evitar problemas de reutilizacion del puerto*/
-  reuse = 1;
+  reuse = (char *) 1;
   setsockopt(listener_socket, SOL_SOCKET, SO_REUSEADDR, (char *) reuse, sizeof(int));
 
   if(bind(listener_socket, (struct sockaddr *) &address, sizeof(address)) == -1) {
@@ -67,4 +74,12 @@ int main()
     }
   }
   return 0;
+}
+
+
+void sigchld_handler(int sig)
+{
+   while (waitpid(-1, 0, WNOHANG) > 0)
+  ;
+   return;
 }
