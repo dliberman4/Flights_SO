@@ -24,6 +24,7 @@ int main()
 
   if((listener_socket = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
     printf("error al crear el socket\n");
+    return 1;
   }
 
   printf("listener_socket creado\n");
@@ -40,6 +41,7 @@ int main()
 
   if(bind(listener_socket, (struct sockaddr *) &address, sizeof(address)) == -1) {
     printf("error en bind\n");
+    return 1;
   }
   printf("bind OK!\n");
 
@@ -48,19 +50,25 @@ int main()
 
   while(1) {
     address_size = sizeof(client);
-    printf("esperando al cliente...\n");
+    printf("P: esperando al cliente...\n");
     accepted_socket = accept(listener_socket, (struct sockaddr *) &client, &address_size);
     if(accepted_socket == -1) {
-      printf("error al aceptar\n");
+      printf("P: error al aceptar\n");
+      return 1;
     }
     switch(fork()) {
       case 0:
               close(listener_socket);
-              printf("soy el hijo\natendiendo al cliente\n");
-              send(accepted_socket, "Hola como estas? Me duermo...\n", 17, 0);
-              sleep(15);
-              send(accepted_socket, "Ya me dormi. Adios!\n", 17, 0);
+              printf("H: soy el hijo\nH: atendiendo al cliente\n");
+              if(write(accepted_socket, "Hola como estas? Me duermo...\n", 30) < 0) {
+                printf("H: error al escribir en el socket\n");
+              }
+              sleep(10);
+              if(write(accepted_socket, "Ya me dormi. Adios!\n", 20) < 0) {
+                printf("H: error al escribir en el socket\n");
+              }
               close(accepted_socket);
+              printf("H: mi trabajo termino. Adios!\n");
               exit(0);
               break;
       case -1:
@@ -68,7 +76,7 @@ int main()
               close(accepted_socket);
               break;
       default:
-              printf("soy el padre, sigo\n");
+              printf("P: soy el padre, sigo\n");
               close(accepted_socket);
               break;
     }
