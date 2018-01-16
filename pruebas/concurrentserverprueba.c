@@ -7,6 +7,7 @@
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include "constants.h"
 
 
 void sigchld_handler(int sig);
@@ -16,9 +17,11 @@ int main()
   int listener_socket;
   int accepted_socket;
   int address_size;
+  int bytes;
   char * reuse;
   struct sockaddr_in address;
   struct sockaddr_storage client;
+  char buffer[MAX_BUF_SIZE];
 
   signal(SIGCHLD, sigchld_handler);
 
@@ -28,6 +31,8 @@ int main()
   }
 
   printf("listener_socket creado\n");
+
+  bzero(&address, sizeof(address));
 
   address.sin_family = PF_INET;
   address.sin_port = htons(2000);
@@ -60,9 +65,27 @@ int main()
       case 0:
               close(listener_socket);
               printf("H: soy el hijo\nH: atendiendo al cliente\n");
-              if(write(accepted_socket, "Hola como estas? Me duermo...\n", 30) < 0) {
+
+              bytes = write(accepted_socket, "Introduzca el numero de operacion:\n1: Obtener el estado de vuelo.\n2: Reservar asiento.\n3: Cancelar reserva de asiento.\n", 119);
+
+              if(bytes < 0) {
                 printf("H: error al escribir en el socket\n");
               }
+
+              if((bytes = read(accepted_socket, buffer, MAX_BUF_SIZE)) > 0) {
+                switch((int) strtol(buffer, (char**) NULL, 10)) {
+                  case GET_FLIGHT_STATE:
+                      printf("eligió opcion 1\n");
+                      break;
+                  case BOOK_SEAT:
+                      printf("eligió opcion 2\n");
+                      break;
+                  case CANCEL_SEAT:
+                      printf("eligió opcion 3\n");
+                      break;
+                }
+              }
+
               sleep(10);
               if(write(accepted_socket, "Ya me dormi. Adios!\n", 20) < 0) {
                 printf("H: error al escribir en el socket\n");
