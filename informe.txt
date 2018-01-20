@@ -1,3 +1,6 @@
 -decidí utilizar las funciones prepare, step y finalize de sqlite3 en lugar de
 exec porque me surgió la duda de si el callback se ejecuta de manera concurrente
-y además para poder entender mejor cómo funciona. 
+y además para poder entender mejor cómo funciona.
+-sockets sacados de "https://www.freebsd.org/doc/en/books/developers-handbook/sockets.html"
+video explicativo: https://www.youtube.com/watch?v=aj8S62TDzRg
+http://www.cs.rpi.edu/~moorthy/Courses/os98/Pgms/client.c
