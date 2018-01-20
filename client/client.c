@@ -51,6 +51,24 @@ int main(int argc, char * argv[])
       printf("C: error al escribir en el socket\n");
     }
 
+
+/*nuevo*/
+
+    while(1){
+      if((bytes = read(client_socket, buffer, MAX_BUF_SIZE)) > 0) {
+        write(1, buffer, bytes);
+      }
+
+      bzero(buffer, 256);
+      fgets(buffer, 255, stdin);
+
+      bytes = write(client_socket, buffer, MAX_BUF_SIZE);
+
+      if(bytes < 0) {
+        printf("C: error al escribir en el socket\n");
+      }
+    }
+
     close(client_socket);
     return 0;
 }
