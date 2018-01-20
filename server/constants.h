@@ -4,5 +4,9 @@
 #define MAX_FLIGHT_NUMBER 8
 #define SERVER_PORT 1049
 #define CLIENT_QUEUE_SIZE 10
+#define GET_FLIGHT_STATE 1
+#define BOOK_SEAT 2
+#define CANCEL_SEAT 3
+#define MAX_BUF_SIZE 256
 
 #endif
