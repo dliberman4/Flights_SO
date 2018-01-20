@@ -8,34 +8,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "constants.h"
+#include "daemonserver.h"
 
-
-void sigchld_handler(int sig);
-
-int main()
+/* llamada a socket()
+retorn a el nuevo socket */
+int open_socket()
 {
-  int listener_socket;
-  int accepted_socket;
-  int address_size;
-  int bytes;
+  int s;
+
+  if((s = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
+    return ERROR_SERVER;
+  }
+  return s;
+}
+
+/* llena la estructura sockaddr_in
+reuse
+bind */
+void bind_to_port(int listener_socket, int port)
+{
   char * reuse;
   struct sockaddr_in address;
-  struct sockaddr_storage client;
-  char buffer[MAX_BUF_SIZE];
-
-  signal(SIGCHLD, sigchld_handler);
-
-  if((listener_socket = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
-    printf("error al crear el socket\n");
-    return 1;
-  }
-
-  printf("listener_socket creado\n");
 
   bzero(&address, sizeof(address));
 
   address.sin_family = PF_INET;
-  address.sin_port = htons(2000);
+  address.sin_port = htons(port);
 
   if(INADDR_ANY)
     address.sin_addr.s_addr = htonl(INADDR_ANY);
@@ -46,9 +44,53 @@ int main()
 
   if(bind(listener_socket, (struct sockaddr *) &address, sizeof(address)) == -1) {
     printf("error en bind\n");
-    return 1;
+    return;
   }
   printf("bind OK!\n");
+}
+
+int main()
+{
+  int listener_socket;
+  int accepted_socket;
+  int address_size;
+  int bytes;
+  struct sockaddr_storage client;
+  char buffer[MAX_BUF_SIZE];
+
+  signal(SIGCHLD, sigchld_handler);
+
+  listener_socket = open_socket();
+  if(listener_socket == ERROR_SERVER) {
+    printf("error al crear el socket\n");
+    return 1;
+  }
+  printf("listener_socket creado\n");
+
+  // if((listener_socket = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
+  //   printf("error al crear el socket\n");
+  //   return 1;
+  // }
+
+  bind_to_port(listener_socket, 2000);
+
+  // bzero(&address, sizeof(address));
+  //
+  // address.sin_family = PF_INET;
+  // address.sin_port = htons(2000);
+  //
+  // if(INADDR_ANY)
+  //   address.sin_addr.s_addr = htonl(INADDR_ANY);
+  //
+  // /*evitar problemas de reutilizacion del puerto*/
+  // reuse = (char *) 1;
+  // setsockopt(listener_socket, SOL_SOCKET, SO_REUSEADDR, (char *) reuse, sizeof(int));
+  //
+  // if(bind(listener_socket, (struct sockaddr *) &address, sizeof(address)) == -1) {
+  //   printf("error en bind\n");
+  //   return 1;
+  // }
+  // printf("bind OK!\n");
 
 /*prueba daemon*/
   switch (fork()) {
