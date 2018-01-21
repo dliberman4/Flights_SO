@@ -172,7 +172,7 @@ void get_flight_state_server(char * flight_number, int accepted_socket)
   code = db_open();
   printf("%d\n", code);
 
-  code = db_get_flight_dim("CCC11", dim);
+  code = db_get_flight_dim(flight_number, dim);
   printf("%d\n", code);
   printf("el vuelo %s tiene filas: %d y cols: %d\n", flight_number, dim[0], dim[1]);
   reservations_quantity = db_get_reservations_quantity(flight_number);
@@ -185,13 +185,13 @@ void get_flight_state_server(char * flight_number, int accepted_socket)
 
   for(i = 0; i < dim[0]; i++) {
     for(j = 0; j < dim[1]; j++) {
-      state[dim[1]*i + j] = 'D';
+      state[(dim[1]+1)*i + j] = 'D';
     }
-    state[dim[1]*i + j+1] = '\n';
+    state[(dim[1]+1)*i + j] = '\n';
   }
 
   for(i = 0; i < reservations_quantity; i++) {
-    state[dim[1]* (reservations[i].seat_row) + (reservations[i].seat_col)] = 'R';
+    state[(dim[1]+1)* (reservations[i].seat_row) + (reservations[i].seat_col)] = 'R';
   }
 
   printf("%s\n", state);
