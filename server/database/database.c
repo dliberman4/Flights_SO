@@ -95,12 +95,14 @@ int db_get_flight_dim(const char * flight_number, int dim[2])
   char * query;
   sqlite3_stmt * statement;
 
-  query =   "select plane_rows,plane_cols from flight where flight_number = ?;";
+  query = "select plane_rows,plane_cols from flight where flight_number = ?;";
 
   code = sqlite3_prepare_v2(db_connection, query, -1, &statement, NULL);
 
-  if(code != SQLITE_OK)
+  if(code != SQLITE_OK) {
+    printf("error 1\n");
     return DB_ERROR;
+  }
 
   sqlite3_bind_text(statement, 1, flight_number, -1, NULL);
 
@@ -108,10 +110,13 @@ int db_get_flight_dim(const char * flight_number, int dim[2])
 
   if(code == SQLITE_ERROR)
     return DB_WRONG_RESULT;
-  if(code != SQLITE_DONE && code != SQLITE_ROW)
+  if(code != SQLITE_DONE && code != SQLITE_ROW) {
+    printf("error 2\n");
     return DB_ERROR;
+  }
   dim[0] = sqlite3_column_int(statement, 0);
   dim[1] = sqlite3_column_int(statement, 1);
+
 
   sqlite3_finalize(statement);
   return DB_OK;
