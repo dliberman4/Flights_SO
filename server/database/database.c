@@ -5,13 +5,16 @@
 
 #define MAX_QUERY_LENGTH 255
 
-static sqlite3 * db_connection;
+static sqlite3 * db_connection = NULL;
 
 
 int db_open()
 {
   int code;
 
+  if(db_connection != NULL) {
+    return DB_OK;
+  }
   code = sqlite3_open(DB_FILE_NAME, &db_connection);
 
   if(code != SQLITE_OK)
@@ -35,6 +38,7 @@ int db_close(int should_wait)
   }
   if(code)
     return DB_ERROR;
+  db_connection = NULL;
   return DB_OK;
 }
 
@@ -95,12 +99,14 @@ int db_get_flight_dim(const char * flight_number, int dim[2])
   char * query;
   sqlite3_stmt * statement;
 
-  query =   "select plane_rows,plane_cols from flight where flight_number = ?;";
+  query = "select plane_rows,plane_cols from flight where flight_number = ?;";
 
   code = sqlite3_prepare_v2(db_connection, query, -1, &statement, NULL);
 
-  if(code != SQLITE_OK)
+  if(code != SQLITE_OK) {
+    printf("error 1\n");
     return DB_ERROR;
+  }
 
   sqlite3_bind_text(statement, 1, flight_number, -1, NULL);
 
@@ -108,10 +114,13 @@ int db_get_flight_dim(const char * flight_number, int dim[2])
 
   if(code == SQLITE_ERROR)
     return DB_WRONG_RESULT;
-  if(code != SQLITE_DONE && code != SQLITE_ROW)
+  if(code != SQLITE_DONE && code != SQLITE_ROW) {
+    printf("error 2\n");
     return DB_ERROR;
+  }
   dim[0] = sqlite3_column_int(statement, 0);
   dim[1] = sqlite3_column_int(statement, 1);
+
 
   sqlite3_finalize(statement);
   return DB_OK;
@@ -209,9 +218,9 @@ int db_get_reservations(const char * flight_number, reservation_t * reservations
   sqlite3_stmt * statement;
 
   if(flight_number != NULL)
-    query = "select * from reservation where flight_number = ?;";
+    query = "select flight_number,seat_row,seat_col,dni from reservation where flight_number = ?;";
   else
-    query = "select * from reservation;";
+    query = "select flight_number,seat_row,seat_col,dni from reservation;";
   code = sqlite3_prepare_v2(db_connection, query, -1, &statement, NULL);
 
   if(code != SQLITE_OK)

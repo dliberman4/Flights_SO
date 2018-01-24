@@ -8,12 +8,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "constants.h"
+#include "types.h"
+#include "database/database.h"
 
 #define ERROR_SERVER -1
 int open_socket();
 void bind_to_port(int listener_socket, int port);
 void sigchld_handler(int sig);
-void new_flight(int accepted_socket);
+int get_flight_state_server(int accepted_socket);
+int book_seat_server(int accepted_socket);
+int cancel_seat_server(int accepted_socket);
+int new_flight_server(int accepted_socket);
 
 int open_socket()
 {
@@ -49,14 +54,23 @@ void bind_to_port(int listener_socket, int port)
   printf("bind OK!\n");
 }
 
+void sigchld_handler(int sig)
+{
+  while (waitpid(-1, 0, WNOHANG) > 0)
+  ;
+  return;
+}
+
 int main()
 {
   int listener_socket;
   int accepted_socket;
-  int address_size;
   int bytes;
+  int choice;
+  int code;
+  int should_close;
+  socklen_t address_size;
   struct sockaddr_storage client;
-  char buffer[MAX_BUF_SIZE];
 
   signal(SIGCHLD, sigchld_handler);
 
@@ -101,41 +115,39 @@ int main()
       case 0:
               close(listener_socket);
               printf("H: soy el hijo\nH: atendiendo al cliente\n");
+              should_close = 0;
 
-              bytes = write(accepted_socket, "Introduzca el numero de operacion:\n1: Obtener el estado de vuelo.\n2: Reservar asiento.\n3: Cancelar reserva de asiento.\n4: Crear nuevo vuelo\n", 140);
+              while(!should_close) {
+                if((bytes = read(accepted_socket, &choice, sizeof(int))) < 0) {
+                  printf("error al leer del socket (choice)\n");
+                  return ERROR_SERVER;
+                }
 
-              if(bytes < 0) {
-                printf("H: error al escribir en el socket\n");
-              }
+                printf("choice = %d\n", choice);
 
-              if((bytes = read(accepted_socket, buffer, MAX_BUF_SIZE)) > 0) {
-                switch((int) strtol(buffer, (char**) NULL, 10)) {
+                switch(choice) {
                   case GET_FLIGHT_STATE:
-                      bytes = write(accepted_socket, "Ingrese el numero de vuelo\n", 27);
-                      if(bytes < 0) {
-                        printf("H: error al escribir en el socket\n");
-                      }
-                      if((bytes = read(accepted_socket, buffer, MAX_BUF_SIZE)) > 0) {
-
-                      }
+                      code = get_flight_state_server(accepted_socket);
                       break;
                   case BOOK_SEAT:
-                      bytes = write(accepted_socket, "Ingrese el numero de vuelo\n", 27);
-                      if(bytes < 0) {
-                        printf("H: error al escribir en el socket\n");
-                      }
+                      code = book_seat_server(accepted_socket);
                       break;
                   case CANCEL_SEAT:
-                      bytes = write(accepted_socket, "Ingrese el numero de vuelo\n", 27);
-                      if(bytes < 0) {
-                        printf("H: error al escribir en el socket\n");
-                      }
+                      code = cancel_seat_server(accepted_socket);
                       break;
                   case NEW_FLIGHT:
-                      new_flight(accepted_socket);
+                      code = new_flight_server(accepted_socket);
+                      break;
+                  case CLOSE:
+                      should_close = 1;
                       break;
                   default:
-                      bytes = write(accepted_socket, "Esa no es una opción válida. Por favor, ingrese otra\n", 53);
+                      break;
+                }
+
+                if(code < 0){
+                  printf("error: %d\n", code);
+                  return code;
                 }
               }
 
@@ -159,49 +171,95 @@ int main()
   return 0;
 }
 
-void new_flight(int accepted_socket)
+
+int get_flight_state_server(int accepted_socket)
 {
-  char flight_number[MAX_FLIGHT_NUMBER];
-  int plane_rows;
-  int plane_cols;
-  char buffer[MAX_BUF_SIZE];
+  int reservations_quantity;
+  reservation_t * reservations;
+  int code;
   int bytes;
+  flight_server_t flight;
 
-  printf("entre al new flight\n");
-
-  bytes = write(accepted_socket, "Ingrese el numero de vuelo\n", 27);
-  if(bytes < 0) {
-    printf("H: error al escribir en el socket\n");
-  }
-  if((bytes = read(accepted_socket, buffer, MAX_BUF_SIZE)) < 0) {
-    printf("error al leer del socket\n");
+  if((bytes = read(accepted_socket, &flight, sizeof(flight_server_t))) < 0) {
+    printf("error al leer del socket (flight)\n");
+    return ERROR_SERVER;
   }
 
-  strcpy(flight_number, buffer);
+  code = db_open();
+  if(code < 0) {
+    printf("error al abrir la db\n");
+  }
+  code = db_get_flight_dim(flight.flight_number, flight.dim);
+  if(code < 0) {
+    printf("error al pedir las dimensiones\n");
+  }
 
-  bytes = write(accepted_socket, "Ingrese la cantidad de filas\n", 29);
-  if(bytes < 0) {
-    printf("H: error al escribir en el socket\n");
-  }
-  if((bytes = read(accepted_socket, buffer, MAX_BUF_SIZE)) < 0) {
-    printf("error al leer del socket\n");
-  }
-  plane_rows = (int) strtol(buffer, (char**) NULL, 10);
-  bytes = write(accepted_socket, "Ingrese la cantidad de columnas\n", 32);
-  if(bytes < 0) {
-    printf("H: error al escribir en el socket\n");
-  }
-  if((bytes = read(accepted_socket, buffer, MAX_BUF_SIZE)) < 0) {
-    printf("error al leer del socket\n");
-  }
-  plane_cols = (int) strtol(buffer, (char**) NULL, 10);
+  printf("el vuelo %s tiene filas: %d y cols: %d\n", flight.flight_number, flight.dim[0], flight.dim[1]);
 
-  printf("numero de vuelo: %s, filas: %d, columnas: %d\n", flight_number, plane_rows, plane_cols);
+  if(write(accepted_socket, flight.dim, sizeof(int[2])) < 0) {
+    printf("error al escribir en el socket (dim)\n");
+  }
+  reservations_quantity = db_get_reservations_quantity(flight.flight_number);
+  printf("la cantidad de reservas es: %d\n", reservations_quantity);
+
+  if(write(accepted_socket, &reservations_quantity, sizeof(int)) < 0) {
+    printf("error al escribir en el socket (reservations_quantity)\n");
+  }
+  reservations = (reservation_t *) malloc(sizeof(reservation_t) * reservations_quantity);
+
+  if(db_get_reservations(flight.flight_number, reservations) < 0) {
+    printf("error al obtener las reservasn");
+  }
+
+  if(write(accepted_socket, reservations, sizeof(reservation_t) * reservations_quantity) < 0) {
+    printf("error al escribir en el socket (reservations)\n");
+  }
+
+  free(reservations);
+  code = db_close(1);
+
+  if(code < 0) {
+    printf("error al cerrar la db\n");
+  }
+
+  return 0;
 }
 
-void sigchld_handler(int sig)
+int book_seat_server(int accepted_socket)
 {
-   while (waitpid(-1, 0, WNOHANG) > 0)
-  ;
-   return;
+  int code;
+  int bytes;
+  reservation_t reservation;
+
+  if((bytes = read(accepted_socket, &reservation, sizeof(reservation_t))) < 0) {
+    printf("error al leer del socket (seat)\n");
+    return ERROR_SERVER;
+  }
+
+  code = db_open();
+  if(code < 0) {
+    printf("error al abrir la db\n");
+  }
+  printf("flight_number: %s, seat_row: %d, seat_col: %d, dni: %d\n",
+        reservation.flight_number, reservation.seat_row, reservation.seat_col,
+        reservation.dni);
+  code = db_book_seat(&reservation);
+  printf("code: %d\n", code);
+  if(write(accepted_socket, &code, sizeof(int)) < 0) {
+    printf("error al escribir en el socket (reservations)\n");
+  }
+
+  code = db_close(1);
+  if(code < 0) {
+    printf("error al cerrar la db\n");
+  }
+  return 0;
+}
+int cancel_seat_server(int accepted_socket)
+{
+  return 0;
+}
+int new_flight_server(int accepted_socket)
+{
+  return 0;
 }
