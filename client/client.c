@@ -7,16 +7,16 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include "constants.h"
+#include "types.h"
 
-#define MAX_BUF_SIZE 256
 #define SERVER_PORT 1049
 #define ERROR_SOCKET -1
 
 int client_socket_initialize();
-void get_flight_state_client(int client_socket);
-void book_seat_client(int client_socket);
-void cancel_seat_client(int client_socket);
-void new_flight_client(int client_socket);
+int get_flight_state_client(int client_socket, int choice, char flight_number[MAX_FLIGHT_NUMBER+1]);
+int book_seat_client(int client_socket, int choice, char flight_number[MAX_FLIGHT_NUMBER+1]);
+int cancel_seat_client(int client_socket, int choice, char flight_number[MAX_FLIGHT_NUMBER+1]);
+int new_flight_client(int client_socket, int choice, char flight_number[MAX_FLIGHT_NUMBER+1]);
 
 int client_socket_initialize()
 {
@@ -41,48 +41,6 @@ int client_socket_initialize()
   return client_socket;
 }
 
-void get_flight_state_client(int client_socket)
-{
-  int bytes;
-  char buffer[MAX_BUF_SIZE];
-
-  printf("ingrese el numero de vuelo que desea consultar\n");
-  bzero(buffer, 256);
-  scanf("%s", buffer);
-  //fgets(buffer, 255, stdin);
-
-  /*mando el numero de vuelo*/
-  bytes = write(client_socket, buffer, strlen(buffer)+1);
-  if(bytes < 0) {
-    printf("C: error al escribir en el socket\n");
-  }
-
-  if((bytes = read(client_socket, buffer, MAX_BUF_SIZE)) > 0) {
-    write(1, buffer, bytes);
-  }
-}
-
-void book_seat_client(int client_socket)
-{
-  int bytes;
-  char buffer[MAX_BUF_SIZE];
-
-
-}
-void cancel_seat_client(int client_socket)
-{
-  int bytes;
-  char buffer[MAX_BUF_SIZE];
-
-
-}
-void new_flight_client(int client_socket)
-{
-  int bytes;
-  char buffer[MAX_BUF_SIZE];
-
-}
-
 /*
 primer argumento: puerto
 segundo argumento: ip
@@ -91,7 +49,11 @@ int main(int argc, char * argv[])
 {
     int client_socket;
     int bytes;
+    int choice;
+    int code;
     char buffer[MAX_BUF_SIZE];
+    char flight_number[MAX_FLIGHT_NUMBER];
+    char * msg;
 
     client_socket = client_socket_initialize();
     if(client_socket == ERROR_SOCKET) {
@@ -99,32 +61,135 @@ int main(int argc, char * argv[])
       return 1;
     }
 
-    printf("Introduzca el numero de operacion:\n1: Obtener el estado de vuelo.\n2: Reservar asiento.\n3: Cancelar reserva de asiento.\n4: Crear nuevo vuelo\n");
-    bzero(buffer, 256);
-    fgets(buffer, 255, stdin);
-
-    /*mando la opcion elegida*/
-    bytes = write(client_socket, buffer, strlen(buffer)+1);
-    if(bytes < 0) {
-      printf("C: error al escribir en el socket\n");
+    printf("Introduzca el numero de operacion:\n1: Obtener el estado de vuelo.\n"
+    "2: Reservar asiento.\n3: Cancelar reserva de asiento.\n4: "
+    "Crear nuevo vuelo\n5: Eliminar un vuelo\n");
+    bzero(buffer, MAX_BUF_SIZE);
+    scanf("%d", &choice);
+    while(choice < 1 || choice > MAX_CHOICE) {
+      printf("Esa opción no es correcta. Ingrese otra.");
+      bzero(buffer, MAX_BUF_SIZE);
+      scanf("%d", &choice);
     }
 
-    switch((int) strtol(buffer, (char**) NULL, 10)) {
-      case GET_FLIGHT_STATE:
-        get_flight_state_client(client_socket);
-        break;
-      case BOOK_SEAT:
-        book_seat_client(client_socket);
-        break;
-      case CANCEL_SEAT:
-        cancel_seat_client(client_socket);
-        break;
-      case NEW_FLIGHT:
-        new_flight_client(client_socket);
-        break;
+    printf("ingrese el numero de vuelo\n");
+    bzero(buffer, MAX_BUF_SIZE);
+    scanf("%s", buffer);
+    while(strlen(buffer) > MAX_FLIGHT_NUMBER) {
+      printf("Ese numero no es válido. Ingrese máximo %d caracteres\n", MAX_FLIGHT_NUMBER);
+      bzero(buffer, MAX_BUF_SIZE);
+      scanf("%s", buffer);
+    }
+    strcpy(flight_number, buffer);
 
+
+    switch(choice) {
+      case GET_FLIGHT_STATE:
+      code = get_flight_state_client(client_socket, choice, flight_number);
+      break;
+      case BOOK_SEAT:
+      code = book_seat_client(client_socket, choice, flight_number);
+      break;
+      case CANCEL_SEAT:
+      code = cancel_seat_client(client_socket, choice, flight_number);
+      break;
+      case NEW_FLIGHT:
+      code = new_flight_client(client_socket, choice, flight_number);
+      break;
+    }
+
+    if(code < 0) {
+      printf("ended with error %d\n", code);
     }
 
     close(client_socket);
-    return 0;
+    return code;
+}
+
+int get_flight_state_client(int client_socket, int choice, char flight_number[MAX_FLIGHT_NUMBER+1])
+{
+  int bytes;
+  int i,j;
+  char buffer[MAX_BUF_SIZE];
+  flight_t flight;
+  reservation_t * reservations;
+  int reservations_quantity;
+  char * state;
+
+  flight.choice = choice;
+  strcpy(flight.flight_number, flight_number);
+
+  bytes = write(client_socket, &flight, sizeof(flight_t));
+  if(bytes < 0) {
+    printf("Se ha producido un error. Acción no realizada. Intentelo mas tarde.\n");
+    return ERROR_SOCKET;
+  }
+
+  if((bytes = read(client_socket, flight.dim, sizeof(int[2]))) < 0) {
+    printf("error al leer del socket (dim)\n");
+    return ERROR_SOCKET;
+  }
+
+  printf("tengo %d filas y %d cols\n", flight.dim[0], flight.dim[1]);
+
+  if((bytes = read(client_socket, &reservations_quantity, sizeof(int))) < 0) {
+    printf("error al leer del socket (reservations_quantity)\n");
+    return ERROR_SOCKET;
+  }
+  printf("hay %d reservas\n", reservations_quantity);
+
+  reservations = (reservation_t *) malloc(sizeof(reservation_t) * reservations_quantity);
+
+  if((bytes = read(client_socket, reservations, sizeof(reservation_t) * reservations_quantity)) < 0) {
+    printf("error al leer del socket (reservations)\n");
+    return ERROR_SOCKET;
+  }
+
+  state = malloc(sizeof(char) * flight.dim[0] * (flight.dim[1]));
+
+  for(i = 0; i < flight.dim[0]; i++) {
+    for(j = 0; j < flight.dim[1]; j++) {
+      state[(flight.dim[1])*i + j] = 'D';
+    }
+  }
+
+  for(i = 0; i < reservations_quantity; i++) {
+    printf("dni: %d, fila: %d, col: %d\n", reservations[i].dni, reservations[i].seat_row, reservations[i].seat_col);
+    state[(flight.dim[1])* (reservations[i].seat_row) + (reservations[i].seat_col)] = 'R';
+  }
+  printf("   |");
+  for(j = 0; j < flight.dim[1]; j++) {
+    putchar(j+'A');
+  }
+  putchar('\n');
+  for(i = 0; i < flight.dim[0]; i++) {
+    printf("%3d|", i+1);
+    for(j = 0; j < flight.dim[1]; j++) {
+      putchar(state[(flight.dim[1])*i + j]);
+    }
+    putchar('\n');
+  }
+
+  free(reservations);
+  free(state);
+  return 0;
+}
+
+int book_seat_client(int client_socket, int choice, char flight_number[MAX_FLIGHT_NUMBER+1])
+{
+  int bytes;
+  char buffer[MAX_BUF_SIZE];
+
+}
+int cancel_seat_client(int client_socket, int choice, char flight_number[MAX_FLIGHT_NUMBER+1])
+{
+  int bytes;
+  char buffer[MAX_BUF_SIZE];
+
+}
+int new_flight_client(int client_socket, int choice, char flight_number[MAX_FLIGHT_NUMBER+1])
+{
+  int bytes;
+  char buffer[MAX_BUF_SIZE];
+
 }
