@@ -65,12 +65,11 @@ int main()
 {
   int listener_socket;
   int accepted_socket;
-  int address_size;
   int bytes;
   int choice;
   int code;
+  socklen_t address_size;
   struct sockaddr_storage client;
-  char buffer[MAX_BUF_SIZE];
 
   signal(SIGCHLD, sigchld_handler);
 
@@ -169,9 +168,7 @@ int main()
 int get_flight_state_server(int accepted_socket)
 {
   int reservations_quantity;
-  int i, j;
   reservation_t * reservations;
-  char * state;
   int code;
   int bytes;
   flight_server_t flight;
@@ -207,27 +204,55 @@ int get_flight_state_server(int accepted_socket)
     printf("error al obtener las reservasn");
   }
 
-  for(i = 0; i < reservations_quantity; i++) {
-      printf("dni: %d, fila: %d, col: %d\n", reservations[i].dni, reservations[i].seat_row, reservations[i].seat_col);
-  }
-  
   if(write(accepted_socket, reservations, sizeof(reservation_t) * reservations_quantity) < 0) {
     printf("error al escribir en el socket (reservations)\n");
   }
 
   free(reservations);
-  db_close(0);
+  code = db_close(1);
+
+  if(code < 0) {
+    printf("error al cerrar la db\n");
+  }
+
+  return 0;
 }
 
 int book_seat_server(int accepted_socket)
 {
+  int code;
+  int bytes;
+  reservation_t reservation;
 
+  if((bytes = read(accepted_socket, &reservation, sizeof(reservation_t))) < 0) {
+    printf("error al leer del socket (seat)\n");
+    return ERROR_SERVER;
+  }
+
+  code = db_open();
+  if(code < 0) {
+    printf("error al abrir la db\n");
+  }
+  printf("flight_number: %s, seat_row: %d, seat_col: %d, dni: %d\n",
+        reservation.flight_number, reservation.seat_row, reservation.seat_col,
+        reservation.dni);
+  code = db_book_seat(&reservation);
+  printf("code: %d\n", code);
+  if(write(accepted_socket, &code, sizeof(int)) < 0) {
+    printf("error al escribir en el socket (reservations)\n");
+  }
+
+  code = db_close(1);
+  if(code < 0) {
+    printf("error al cerrar la db\n");
+  }
+  return 0;
 }
 int cancel_seat_server(int accepted_socket)
 {
-
+  return 0;
 }
 int new_flight_server(int accepted_socket)
 {
-
+  return 0;
 }

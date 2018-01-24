@@ -19,8 +19,8 @@ typedef struct {
 typedef struct {
   int choice;
   char flight_number[MAX_FLIGHT_NUMBER+1];
-  int seat_row;
-  int seat_col;
+  int row;
+  int col;
   int dni;
 } flight_seat_t;
 

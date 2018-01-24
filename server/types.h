@@ -15,11 +15,4 @@ typedef struct {
   int dim[2];
 } flight_server_t;
 
-typedef struct {
-  char flight_number[MAX_FLIGHT_NUMBER+1];
-  int seat_row;
-  int seat_col;
-  int dni;
-} flight_seat_server_t;
-
 #endif

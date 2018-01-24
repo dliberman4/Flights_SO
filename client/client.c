@@ -6,6 +6,7 @@
 #include <stdlib.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <ctype.h>
 #include "constants.h"
 #include "types.h"
 
@@ -48,12 +49,10 @@ segundo argumento: ip
 int main(int argc, char * argv[])
 {
     int client_socket;
-    int bytes;
     int choice;
     int code;
     char buffer[MAX_BUF_SIZE];
     char flight_number[MAX_FLIGHT_NUMBER];
-    char * msg;
 
     client_socket = client_socket_initialize();
     if(client_socket == ERROR_SOCKET) {
@@ -67,7 +66,7 @@ int main(int argc, char * argv[])
     bzero(buffer, MAX_BUF_SIZE);
     scanf("%d", &choice);
     while(choice < 1 || choice > MAX_CHOICE) {
-      printf("Esa opción no es correcta. Ingrese otra.");
+      printf("Esa opción no es correcta. Ingrese otra.\n");
       bzero(buffer, MAX_BUF_SIZE);
       scanf("%d", &choice);
     }
@@ -110,7 +109,6 @@ int get_flight_state_client(int client_socket, int choice, char flight_number[MA
 {
   int bytes;
   int i,j;
-  char buffer[MAX_BUF_SIZE];
   flight_t flight;
   reservation_t * reservations;
   int reservations_quantity;
@@ -178,18 +176,58 @@ int get_flight_state_client(int client_socket, int choice, char flight_number[MA
 int book_seat_client(int client_socket, int choice, char flight_number[MAX_FLIGHT_NUMBER+1])
 {
   int bytes;
-  char buffer[MAX_BUF_SIZE];
+  int code;
+  char aux_col;
+  flight_seat_t seat;
+  seat.choice = choice;
+  strcpy(seat.flight_number, flight_number);
 
+  printf("Ingrese el asiento\n");
+  code = scanf("%d%1[a-zA-Z]", &(seat.row), &aux_col);
+  printf("code %d\n", code);
+  while(code != 2) {
+    while ((code = getchar()) != '\n' && code != EOF) { }
+    printf("Ese no es un asiento válido. Ingréselo nuevamente.\n");
+    code = scanf("%d%1[a-zA-Z]", &(seat.row), &aux_col);
+  }
+
+  printf("ingrese su DNI\n");
+  code = scanf("%d", &seat.dni);
+  while(code != 1) {
+    while ((code = getchar()) != '\n' && code != EOF) { }
+    printf("DNI inválido. Ingréselo nuevamente\n");
+    code = scanf("%d", &seat.dni);
+  }
+
+  seat.col = aux_col - (islower(aux_col)  ? 'a' : 'A');
+  seat.row--;
+
+  //printf("mando el asiento: fil: %d col: %d dni: %d\n", seat.row, seat.col, seat.dni);
+  bytes = write(client_socket, &seat, sizeof(flight_seat_t));
+  if(bytes < 0) {
+    printf("Se ha producido un error. Acción no realizada. Intentelo mas tarde.\n");
+    return ERROR_SOCKET;
+  }
+
+  if((bytes = read(client_socket, &code, sizeof(int))) < 0) {
+    printf("error al leer del socket (ultimo)\n");
+    return ERROR_SOCKET;
+  }
+  if(code < 0) {
+    printf("El asiento ingresado no pudo ser reservado.\n");
+    return 1;
+  }
+  printf("Reserva realizada con éxito!\n");
+  return 0;
 }
+
 int cancel_seat_client(int client_socket, int choice, char flight_number[MAX_FLIGHT_NUMBER+1])
 {
-  int bytes;
-  char buffer[MAX_BUF_SIZE];
-
+  //int bytes;
+  return 0;
 }
 int new_flight_client(int client_socket, int choice, char flight_number[MAX_FLIGHT_NUMBER+1])
 {
-  int bytes;
-  char buffer[MAX_BUF_SIZE];
-
+  //int bytes;
+  return 0;
 }
