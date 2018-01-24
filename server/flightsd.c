@@ -68,6 +68,7 @@ int main()
   int bytes;
   int choice;
   int code;
+  int should_close;
   socklen_t address_size;
   struct sockaddr_storage client;
 
@@ -114,34 +115,40 @@ int main()
       case 0:
               close(listener_socket);
               printf("H: soy el hijo\nH: atendiendo al cliente\n");
+              should_close = 0;
 
-              if((bytes = read(accepted_socket, &choice, sizeof(int))) < 0) {
-                printf("error al leer del socket (choice)\n");
-                return ERROR_SERVER;
-              }
+              while(!should_close) {
+                if((bytes = read(accepted_socket, &choice, sizeof(int))) < 0) {
+                  printf("error al leer del socket (choice)\n");
+                  return ERROR_SERVER;
+                }
 
-              printf("choice = %d\n", choice);
+                printf("choice = %d\n", choice);
 
-              switch(choice) {
-                case GET_FLIGHT_STATE:
-                    code = get_flight_state_server(accepted_socket);
-                    break;
-                case BOOK_SEAT:
-                    code = book_seat_server(accepted_socket);
-                    break;
-                case CANCEL_SEAT:
-                    code = cancel_seat_server(accepted_socket);
-                    break;
-                case NEW_FLIGHT:
-                    code = new_flight_server(accepted_socket);
-                    break;
-                default:
-                    break;
-              }
+                switch(choice) {
+                  case GET_FLIGHT_STATE:
+                      code = get_flight_state_server(accepted_socket);
+                      break;
+                  case BOOK_SEAT:
+                      code = book_seat_server(accepted_socket);
+                      break;
+                  case CANCEL_SEAT:
+                      code = cancel_seat_server(accepted_socket);
+                      break;
+                  case NEW_FLIGHT:
+                      code = new_flight_server(accepted_socket);
+                      break;
+                  case CLOSE:
+                      should_close = 1;
+                      break;
+                  default:
+                      break;
+                }
 
-              if(code < 0){
-                printf("error: %d\n", code);
-                return code;
+                if(code < 0){
+                  printf("error: %d\n", code);
+                  return code;
+                }
               }
 
               if(write(accepted_socket, "Ya me dormi. Adios!\n", 20) < 0) {

@@ -9,5 +9,7 @@
 #define BOOK_SEAT 2
 #define CANCEL_SEAT 3
 #define NEW_FLIGHT 4
+#define REMOVE_FLIGHT 5
+#define CLOSE 6
 
 #endif

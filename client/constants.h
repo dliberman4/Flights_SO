@@ -1,6 +1,7 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
+#define ERROR_SOCKET -1
 #define MAX_FLIGHT_NUMBER 8
 #define SERVER_PORT 1049
 #define MAX_BUF_SIZE 1024
@@ -10,6 +11,7 @@
 #define CANCEL_SEAT 3
 #define NEW_FLIGHT 4
 #define REMOVE_FLIGHT 5
-#define MAX_CHOICE 5
+#define CLOSE 6
+#define MAX_CHOICE 6
 
 #endif

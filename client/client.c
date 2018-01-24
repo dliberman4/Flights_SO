@@ -10,14 +10,13 @@
 #include "constants.h"
 #include "types.h"
 
-#define SERVER_PORT 1049
-#define ERROR_SOCKET -1
 
 int client_socket_initialize();
 int get_flight_state_client(int client_socket, int choice, char flight_number[MAX_FLIGHT_NUMBER+1]);
 int book_seat_client(int client_socket, int choice, char flight_number[MAX_FLIGHT_NUMBER+1]);
 int cancel_seat_client(int client_socket, int choice, char flight_number[MAX_FLIGHT_NUMBER+1]);
 int new_flight_client(int client_socket, int choice, char flight_number[MAX_FLIGHT_NUMBER+1]);
+int close_connection(int client_socket, int choice);
 
 int client_socket_initialize()
 {
@@ -42,6 +41,13 @@ int client_socket_initialize()
   return client_socket;
 }
 
+int close_connection(int client_socket, int choice) {
+  if(write(client_socket, &choice, sizeof(int)) < 0) {
+    return ERROR_SOCKET;
+  }
+  return 0;
+}
+
 /*
 primer argumento: puerto
 segundo argumento: ip
@@ -51,6 +57,7 @@ int main(int argc, char * argv[])
     int client_socket;
     int choice;
     int code;
+    int should_close;
     char buffer[MAX_BUF_SIZE];
     char flight_number[MAX_FLIGHT_NUMBER];
 
@@ -59,46 +66,59 @@ int main(int argc, char * argv[])
       printf("error al crear el socket\n");
       return 1;
     }
+    should_close = 0;
 
-    printf("Introduzca el numero de operacion:\n1: Obtener el estado de vuelo.\n"
-    "2: Reservar asiento.\n3: Cancelar reserva de asiento.\n4: "
-    "Crear nuevo vuelo\n5: Eliminar un vuelo\n");
-    bzero(buffer, MAX_BUF_SIZE);
-    scanf("%d", &choice);
-    while(choice < 1 || choice > MAX_CHOICE) {
-      printf("Esa opción no es correcta. Ingrese otra.\n");
+    while(!should_close) {
+      printf("Introduzca el numero de operacion:\n1: Obtener el estado de vuelo.\n"
+      "2: Reservar asiento.\n3: Cancelar reserva de asiento.\n4: "
+      "Crear nuevo vuelo\n5: Eliminar un vuelo\n6: Salir\n");
       bzero(buffer, MAX_BUF_SIZE);
       scanf("%d", &choice);
-    }
+      while(choice < 1 || choice > MAX_CHOICE) {
+        printf("Esa opción no es correcta. Ingrese otra.\n");
+        bzero(buffer, MAX_BUF_SIZE);
+        scanf("%d", &choice);
+      }
 
-    printf("ingrese el numero de vuelo\n");
-    bzero(buffer, MAX_BUF_SIZE);
-    scanf("%s", buffer);
-    while(strlen(buffer) > MAX_FLIGHT_NUMBER) {
-      printf("Ese numero no es válido. Ingrese máximo %d caracteres\n", MAX_FLIGHT_NUMBER);
-      bzero(buffer, MAX_BUF_SIZE);
-      scanf("%s", buffer);
-    }
-    strcpy(flight_number, buffer);
+      if(choice != CLOSE) {
+        printf("ingrese el numero de vuelo\n");
+        bzero(buffer, MAX_BUF_SIZE);
+        scanf("%s", buffer);
+        while(strlen(buffer) > MAX_FLIGHT_NUMBER) {
+          printf("Ese numero no es válido. Ingrese máximo %d caracteres\n", MAX_FLIGHT_NUMBER);
+          bzero(buffer, MAX_BUF_SIZE);
+          scanf("%s", buffer);
+        }
+        strcpy(flight_number, buffer);
+      }
 
+      switch(choice) {
+        case GET_FLIGHT_STATE:
+          code = get_flight_state_client(client_socket, choice, flight_number);
+          break;
+        case BOOK_SEAT:
+          code = book_seat_client(client_socket, choice, flight_number);
+          break;
+        case CANCEL_SEAT:
+          code = cancel_seat_client(client_socket, choice, flight_number);
+          break;
+        case NEW_FLIGHT:
+          code = new_flight_client(client_socket, choice, flight_number);
+          break;
+        case REMOVE_FLIGHT:
+          //code = new_flight_client(client_socket, choice, flight_number);
+          break;
+        case CLOSE:
+          code = close_connection(client_socket, choice);
+          if(code == 0) {
+            should_close = 1;
+          }
+          break;
+      }
 
-    switch(choice) {
-      case GET_FLIGHT_STATE:
-      code = get_flight_state_client(client_socket, choice, flight_number);
-      break;
-      case BOOK_SEAT:
-      code = book_seat_client(client_socket, choice, flight_number);
-      break;
-      case CANCEL_SEAT:
-      code = cancel_seat_client(client_socket, choice, flight_number);
-      break;
-      case NEW_FLIGHT:
-      code = new_flight_client(client_socket, choice, flight_number);
-      break;
-    }
-
-    if(code < 0) {
-      printf("ended with error %d\n", code);
+      if(code < 0) {
+        printf("ended with error %d\n", code);
+      }
     }
 
     close(client_socket);
@@ -182,6 +202,8 @@ int book_seat_client(int client_socket, int choice, char flight_number[MAX_FLIGH
   seat.choice = choice;
   strcpy(seat.flight_number, flight_number);
 
+  get_flight_state_client(client_socket, GET_FLIGHT_STATE, flight_number);
+
   printf("Ingrese el asiento\n");
   code = scanf("%d%1[a-zA-Z]", &(seat.row), &aux_col);
   printf("code %d\n", code);
@@ -218,6 +240,7 @@ int book_seat_client(int client_socket, int choice, char flight_number[MAX_FLIGH
     return 1;
   }
   printf("Reserva realizada con éxito!\n");
+  get_flight_state_client(client_socket, GET_FLIGHT_STATE, flight_number);
   return 0;
 }
 
