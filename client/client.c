@@ -11,14 +11,14 @@
 #include "types.h"
 
 
-int client_socket_initialize();
+int client_socket_initialize(const char * ip);
 int get_flight_state_client(int client_socket, int choice, char flight_number[MAX_FLIGHT_NUMBER+1]);
 int book_seat_client(int client_socket, int choice, char flight_number[MAX_FLIGHT_NUMBER+1]);
 int cancel_seat_client(int client_socket, int choice, char flight_number[MAX_FLIGHT_NUMBER+1]);
 int new_flight_client(int client_socket, int choice, char flight_number[MAX_FLIGHT_NUMBER+1]);
 int close_connection(int client_socket, int choice);
 
-int client_socket_initialize()
+int client_socket_initialize(const char * ip)
 {
   int client_socket;
   struct sockaddr_in address;
@@ -31,7 +31,7 @@ int client_socket_initialize()
 
   address.sin_family = AF_INET;
   address.sin_port = htons(SERVER_PORT);
-  address.sin_addr.s_addr = inet_addr((char *) "127.0.0.1");
+  address.sin_addr.s_addr = inet_addr(ip);
 
   if(connect(client_socket, (struct sockaddr *) &address, sizeof(address)) < 0) {
     printf("error al conectar\n");
@@ -61,7 +61,7 @@ int main(int argc, char * argv[])
     char buffer[MAX_BUF_SIZE];
     char flight_number[MAX_FLIGHT_NUMBER];
 
-    client_socket = client_socket_initialize();
+    client_socket = client_socket_initialize(argv[1]);
     if(client_socket == ERROR_SOCKET) {
       printf("error al crear el socket\n");
       return 1;
