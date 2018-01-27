@@ -1,15 +1,8 @@
 #ifndef CONSTANTS_H
 #define CONSTANTS_H
 
-#define MAX_FLIGHT_NUMBER 8
 #define SERVER_PORT 1049
-#define MAX_BUF_SIZE 256
-#define CLIENT_QUEUE_SIZE 10
-#define GET_FLIGHT_STATE 1
-#define BOOK_SEAT 2
-#define CANCEL_SEAT 3
-#define NEW_FLIGHT 4
-#define REMOVE_FLIGHT 5
-#define CLOSE 6
+#define LISTEN_QUEUE_SIZE 10
+#define ERROR_SERVER -1
 
 #endif

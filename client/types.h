@@ -2,6 +2,7 @@
 #define TYPES_H
 
 #include "constants.h"
+#include "../protocol/protocol_constants.h"
 
 typedef struct {
   char flight_number[MAX_FLIGHT_NUMBER+1];

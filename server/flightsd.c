@@ -10,8 +10,8 @@
 #include "constants.h"
 #include "types.h"
 #include "database/database.h"
+#include "../protocol/protocol_constants.h"
 
-#define ERROR_SERVER -1
 int open_socket();
 void bind_to_port(int listener_socket, int port);
 void sigchld_handler(int sig);
@@ -99,8 +99,8 @@ int main()
   //           break;
   // }
 
-  if(listen(listener_socket, 10) == -1) //10 es la maxima cantidad que puede atenderse
-    printf("Se alcanzó el máximo de clientes. Pruebe más tarde\n");
+  if(listen(listener_socket, LISTEN_QUEUE_SIZE) == -1)
+    printf("listen error\n");
 
   while(1) {
     address_size = sizeof(client);

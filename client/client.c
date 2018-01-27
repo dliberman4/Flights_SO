@@ -9,6 +9,7 @@
 #include <ctype.h>
 #include "constants.h"
 #include "types.h"
+#include "../protocol/protocol_constants.h"
 
 
 int client_socket_initialize(const char * ip);

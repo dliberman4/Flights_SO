@@ -4,3 +4,4 @@ y además para poder entender mejor cómo funciona.
 -sockets sacados de "https://www.freebsd.org/doc/en/books/developers-handbook/sockets.html"
 video explicativo: https://www.youtube.com/watch?v=aj8S62TDzRg
 http://www.cs.rpi.edu/~moorthy/Courses/os98/Pgms/client.c
+serializer: https://stackoverflow.com/questions/1577161/passing-a-structure-through-sockets-in-c
