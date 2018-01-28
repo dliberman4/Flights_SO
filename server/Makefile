@@ -12,7 +12,7 @@ all: $(OBJECTS) database
 database:
 	cd database && make all;
 
-$(OBJECTS): $(SOURCE) $(SOURCE_H)
+%.o: %.c
 	$(CC) $(CC_FLAGS) -c $< -o $@
 
 clean:
