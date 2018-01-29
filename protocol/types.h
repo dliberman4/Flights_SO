@@ -6,7 +6,7 @@
 typedef struct {
   int type;
   int bytes;
-  char * buffer;
+  unsigned char * buffer;
 } msg_t;
 
 typedef struct {

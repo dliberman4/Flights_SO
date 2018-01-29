@@ -2,7 +2,7 @@
 
 /*--------------------------------SERIALIZERS--------------------------------*/
 
-char * serialize_int(char * buffer, int value)
+unsigned char * serialize_int(unsigned char * buffer, int value)
 {
   buffer[0] = value >> 24;
   buffer[1] = value >> 16;
@@ -11,13 +11,13 @@ char * serialize_int(char * buffer, int value)
   return buffer + 4;
 }
 
-char * serialize_char(char * buffer, char value)
+unsigned char * serialize_char(unsigned char * buffer, char value)
 {
   buffer[0] = value;
   return buffer + 1;
 }
 
-char * serialize_string(char * buffer, char * str)
+unsigned char * serialize_string(unsigned char * buffer, char * str)
 {
   do {
     buffer = serialize_char(buffer, *str);
@@ -25,7 +25,7 @@ char * serialize_string(char * buffer, char * str)
   return buffer;
 }
 
-char * serialize_reservation(char * buffer, reservation_t reservation)
+unsigned char * serialize_reservation(unsigned char * buffer, reservation_t reservation)
 {
   buffer = serialize_string(buffer, reservation.flight_number);
   buffer = serialize_int(buffer, reservation.seat_row);
@@ -34,9 +34,8 @@ char * serialize_reservation(char * buffer, reservation_t reservation)
   return buffer;
 }
 
-char * serialize_reservation_array(char * buffer, reservation_t * reservations, int length)
+unsigned char * serialize_reservation_array(unsigned char * buffer, reservation_t * reservations, int length)
 {
-  buffer = serialize_int(buffer, length);
   while(length > 0) {
     buffer = serialize_reservation(buffer, *reservations++);
     length--;
@@ -44,7 +43,7 @@ char * serialize_reservation_array(char * buffer, reservation_t * reservations, 
   return buffer;
 }
 
-char * serialize_flight(char * buffer, flight_t flight)
+unsigned char * serialize_flight(unsigned char * buffer, flight_t flight)
 {
   buffer = serialize_string(buffer, flight.flight_number);
   buffer = serialize_int(buffer, flight.dim[0]);
@@ -53,19 +52,19 @@ char * serialize_flight(char * buffer, flight_t flight)
 }
 
 /*-------------------------------DESERIALIZERS-------------------------------*/
-char * deserialize_int(char * buffer, int * value)
+unsigned char * deserialize_int(unsigned char * buffer, int * value)
 {
   *value = (buffer[0] << 24) + (buffer[1] << 16) + (buffer[2] << 8) + buffer[3];
   return buffer + 4;
 }
 
-char * deserialize_char(char * buffer, char * value)
+unsigned char * deserialize_char(unsigned char * buffer, char * value)
 {
   *value = buffer[0];
   return buffer + 1;
 }
 
-char * deserialize_string(char * buffer, char * str)
+unsigned char * deserialize_string(unsigned char * buffer, char * str)
 {
   do {
     buffer = deserialize_char(buffer, str);
@@ -73,7 +72,7 @@ char * deserialize_string(char * buffer, char * str)
   return buffer;
 }
 
-char * deserialize_reservation(char * buffer, reservation_t * reservation)
+unsigned char * deserialize_reservation(unsigned char * buffer, reservation_t * reservation)
 {
   buffer = deserialize_string(buffer, reservation->flight_number);
   buffer = deserialize_int(buffer, &(reservation->seat_row));
@@ -82,11 +81,8 @@ char * deserialize_reservation(char * buffer, reservation_t * reservation)
   return buffer;
 }
 
-char * deserialize_reservation_array(char * buffer, reservation_t * reservations)
+unsigned char * deserialize_reservation_array(unsigned char * buffer, reservation_t * reservations, int length)
 {
-  int length;
-
-  buffer = deserialize_int(buffer, &length);
   while(length > 0) {
     buffer = deserialize_reservation(buffer, reservations++);
     length--;
@@ -94,7 +90,7 @@ char * deserialize_reservation_array(char * buffer, reservation_t * reservations
   return buffer;
 }
 
-char * deserialize_flight(char * buffer, flight_t * flight)
+unsigned char * deserialize_flight(unsigned char * buffer, flight_t * flight)
 {
   buffer = deserialize_string(buffer, flight->flight_number);
   buffer = deserialize_int(buffer, &(flight->dim[0]));

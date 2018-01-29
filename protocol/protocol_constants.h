@@ -8,7 +8,9 @@
 #define CANCEL_SEAT 3
 #define NEW_FLIGHT 4
 #define REMOVE_FLIGHT 5
-#define CLOSE 6
-#define MAX_CHOICE 6
+#define GET_RESERVATIONS 6
+#define GET_CANCELLATIONS 7
+#define CLOSE 8
+#define MAX_CHOICE 8
 
 #endif

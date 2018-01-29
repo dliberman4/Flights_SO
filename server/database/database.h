@@ -2,7 +2,7 @@
 #define DATABASE_H
 
 #include <sqlite3.h>
-#include "../types.h"
+#include "../../protocol/types.h"
 
 #define DB_OK 0
 #define DB_ERROR -1
