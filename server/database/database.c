@@ -27,12 +27,16 @@ int db_open()
 int db_close(int should_wait)
 {
   int code;
+  sqlite3_stmt * stmt;
 
   code = sqlite3_close(db_connection);
   if(code == SQLITE_BUSY) {
     if(!should_wait)
       return DB_BUSY;
     while(code == SQLITE_BUSY) {
+      stmt = sqlite3_next_stmt(db_connection, NULL);
+      if(stmt)
+        sqlite3_finalize(stmt);	
       code = sqlite3_close(db_connection);
     }
   }
@@ -104,7 +108,6 @@ int db_get_flight_dim(const char * flight_number, int dim[2])
   code = sqlite3_prepare_v2(db_connection, query, -1, &statement, NULL);
 
   if(code != SQLITE_OK) {
-    printf("error 1\n");
     return DB_ERROR;
   }
 
@@ -112,15 +115,16 @@ int db_get_flight_dim(const char * flight_number, int dim[2])
 
   code = sqlite3_step(statement);
 
-  if(code == SQLITE_ERROR)
-    return DB_WRONG_RESULT;
-  if(code != SQLITE_DONE && code != SQLITE_ROW) {
-    printf("error 2\n");
+  if(code == SQLITE_ERROR) {
+    sqlite3_finalize(statement);
     return DB_ERROR;
+  }
+  if(code != SQLITE_ROW) {
+    sqlite3_finalize(statement);
+    return DB_WRONG_RESULT;
   }
   dim[0] = sqlite3_column_int(statement, 0);
   dim[1] = sqlite3_column_int(statement, 1);
-
 
   sqlite3_finalize(statement);
   return DB_OK;
@@ -173,10 +177,14 @@ int db_get_reservations_quantity(const char * flight_number)
 
   code = sqlite3_step(statement);
 
-  if(code == SQLITE_ERROR)
+  if(code == SQLITE_ERROR) {
+    sqlite3_finalize(statement);
     return DB_WRONG_RESULT;
-  if(code != SQLITE_DONE && code != SQLITE_ROW)
+  }
+  if(code != SQLITE_DONE && code != SQLITE_ROW) {
+    sqlite3_finalize(statement);
     return DB_ERROR;
+  }
 
   quantity = sqlite3_column_int(statement, 0);
   sqlite3_finalize(statement);
@@ -201,13 +209,14 @@ int db_exists_reservation(reservation_t * reservation)
   sqlite3_bind_int(statement, 3, reservation->seat_col);
   sqlite3_bind_int(statement, 4, reservation->dni);
 
+  code = sqlite3_step(statement);
+
   sqlite3_finalize(statement);
 
-  if(code == SQLITE_ERROR)
-    return 0;
-  if(code != SQLITE_DONE && code != SQLITE_ROW)
-    return DB_ERROR;
-  return 1;
+  if(code == SQLITE_ROW)
+    return 1;
+
+  return 0;
 }
 
 int db_get_reservations(const char * flight_number, reservation_t * reservations)
@@ -266,10 +275,14 @@ int db_get_cancellations_quantity(const char * flight_number)
 
   code = sqlite3_step(statement);
 
-  if(code == SQLITE_ERROR)
+  if(code == SQLITE_ERROR) {
+    sqlite3_finalize(statement);
     return DB_WRONG_RESULT;
-  if(code != SQLITE_DONE && code != SQLITE_ROW)
+  }
+  if(code != SQLITE_DONE && code != SQLITE_ROW) {
+    sqlite3_finalize(statement);
     return DB_ERROR;
+  }
 
   quantity = sqlite3_column_int(statement, 0);
   sqlite3_finalize(statement);
@@ -357,7 +370,7 @@ int db_cancel_seat(reservation_t * reservation)
   char * query;
   sqlite3_stmt * statement;
 
-  if(!db_exists_reservation(reservation))
+  if(db_exists_reservation(reservation) != 1)
     return DB_WRONG_RESULT;
 
   query = "delete from reservation where flight_number = ? and seat_row = ? and seat_col = ? and dni = ?;";

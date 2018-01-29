@@ -19,6 +19,7 @@ int get_flight_state_server(int accepted_socket, msg_t msg);
 int book_seat_server(int accepted_socket, msg_t msg);
 int cancel_seat_server(int accepted_socket, msg_t msg);
 int new_flight_server(int accepted_socket, msg_t msg);
+int remove_flight_server(int accepted_socket, msg_t msg);
 
 int open_socket()
 {
@@ -118,6 +119,7 @@ int main()
               should_close = 0;
 
               while(!should_close) {
+                printf("esperando recibir msg\n");
                 bytes = receive_msg(accepted_socket, &msg);
 
                 if(bytes < 0) {
@@ -139,8 +141,8 @@ int main()
                   case NEW_FLIGHT:
                       code = new_flight_server(accepted_socket, msg);
                       break;
-                  case 10:
-                      printf("10 OK!\n");
+                  case REMOVE_FLIGHT:
+                      code = remove_flight_server(accepted_socket, msg);
                       break;
                   case CLOSE:
                       should_close = 1;
@@ -151,7 +153,6 @@ int main()
 
                 if(code < 0){
                   printf("error: %d\n", code);
-                  return code;
                 }
               }
 
@@ -196,6 +197,10 @@ int get_flight_state_server(int accepted_socket, msg_t msg)
   code = db_get_flight_dim(flight.flight_number, flight.dim);
   if(code < 0) {
     printf("error al pedir las dimensiones\n");
+    msg.type = RESPONSE_ERROR;
+    msg.bytes = 0;
+    bytes = send_msg(accepted_socket, msg);
+    return ERROR_SERVER;
   }
   printf("el vuelo %s tiene filas: %d y cols: %d\n", flight.flight_number, flight.dim[0], flight.dim[1]);
 
@@ -205,12 +210,12 @@ int get_flight_state_server(int accepted_socket, msg_t msg)
   reservations = (reservation_t *) malloc(sizeof(reservation_t) * reservations_quantity);
 
   if(db_get_reservations(flight.flight_number, reservations) < 0) {
-    printf("error al obtener las reservasn");
+    printf("error al obtener las reservas\n");
   }
 
   end_of_buffer = serialize_flight(buffer, flight);
-  end_of_buffer = serialize_int(buffer, reservations_quantity);
-  end_of_buffer = serialize_reservation_array(buffer, reservations, reservations_quantity);
+  end_of_buffer = serialize_int(end_of_buffer, reservations_quantity);
+  end_of_buffer = serialize_reservation_array(end_of_buffer, reservations, reservations_quantity);
 
   msg.type = GET_FLIGHT_STATE;
   msg.bytes = end_of_buffer - buffer;
@@ -223,8 +228,9 @@ int get_flight_state_server(int accepted_socket, msg_t msg)
   }
 
   free(reservations);
+  printf("db a punto de cerrarse\n");
   code = db_close(1);
-
+  printf("db cerrada\n");
   if(code < 0) {
     printf("error al cerrar la db\n");
   }
@@ -234,39 +240,149 @@ int get_flight_state_server(int accepted_socket, msg_t msg)
 
 int book_seat_server(int accepted_socket, msg_t msg)
 {
-  // int code;
-  // int bytes;
-  // reservation_t reservation;
-  //
-  // if((bytes = read(accepted_socket, &reservation, sizeof(reservation_t))) < 0) {
-  //   printf("error al leer del socket (seat)\n");
-  //   return ERROR_SERVER;
-  // }
-  //
-  // code = db_open();
-  // if(code < 0) {
-  //   printf("error al abrir la db\n");
-  // }
-  // printf("flight_number: %s, seat_row: %d, seat_col: %d, dni: %d\n",
-  //       reservation.flight_number, reservation.seat_row, reservation.seat_col,
-  //       reservation.dni);
-  // code = db_book_seat(&reservation);
-  // printf("code: %d\n", code);
-  // if(write(accepted_socket, &code, sizeof(int)) < 0) {
-  //   printf("error al escribir en el socket (reservations)\n");
-  // }
-  //
-  // code = db_close(1);
-  // if(code < 0) {
-  //   printf("error al cerrar la db\n");
-  // }
+  int code;
+  int bytes;
+  reservation_t reservation;
+
+  deserialize_reservation(msg.buffer, &reservation);
+  free(msg.buffer);
+
+  code = db_open();
+  if(code < 0) {
+    printf("error al abrir la db\n");
+  }
+  printf("flight_number: %s, seat_row: %d, seat_col: %d, dni: %d\n",
+        reservation.flight_number, reservation.seat_row, reservation.seat_col,
+        reservation.dni);
+  code = db_book_seat(&reservation);
+
+  printf("code: %d\n", code);
+  if(code < 0)
+    msg.type = RESPONSE_ERROR;
+  else
+    msg.type = RESPONSE_OK;
+
+  msg.bytes = 0;
+
+  bytes = send_msg(accepted_socket, msg);
+
+  if(bytes < 0) {
+    printf("error al escribir en el socket (response)\n");
+  }
+  printf("antes cerrar la db\n");
+  code = db_close(1);
+  if(code < 0) {
+    printf("error al cerrar la db\n");
+  }
+  printf("despues cerrar la db\n");
   return 0;
 }
 int cancel_seat_server(int accepted_socket, msg_t msg)
 {
+  int code;
+  int bytes;
+  reservation_t reservation;
+
+  deserialize_reservation(msg.buffer, &reservation);
+  free(msg.buffer);
+
+  code = db_open();
+  if(code < 0) {
+    printf("error al abrir la db\n");
+  }
+  printf("flight_number: %s, seat_row: %d, seat_col: %d, dni: %d\n",
+        reservation.flight_number, reservation.seat_row, reservation.seat_col,
+        reservation.dni);
+  code = db_cancel_seat(&reservation);
+
+  printf("code: %d\n", code);
+  if(code < 0)
+    msg.type = RESPONSE_ERROR;
+  else
+    msg.type = RESPONSE_OK;
+
+  msg.bytes = 0;
+
+  bytes = send_msg(accepted_socket, msg);
+
+  if(bytes < 0) {
+    printf("error al escribir en el socket (response)\n");
+  }
+
+  code = db_close(1);
+  if(code < 0) {
+    printf("error al cerrar la db\n");
+  }
   return 0;
 }
 int new_flight_server(int accepted_socket, msg_t msg)
 {
+  int code;
+  int bytes;
+  flight_t flight;
+
+  deserialize_flight(msg.buffer, &flight);
+  free(msg.buffer);
+
+  code = db_open();
+  if(code < 0) {
+    printf("error al abrir la db\n");
+  }
+
+  code = db_new_flight(flight.flight_number, flight.dim[0], flight.dim[1]);
+
+  if(code < 0)
+    msg.type = RESPONSE_ERROR;
+  else
+    msg.type = RESPONSE_OK;
+
+  msg.bytes = 0;
+
+  bytes = send_msg(accepted_socket, msg);
+
+  if(bytes < 0) {
+    printf("error al escribir en el socket (response)\n");
+  }
+
+  code = db_close(1);
+  if(code < 0) {
+    printf("error al cerrar la db\n");
+  }
+  return 0;
+}
+
+int remove_flight_server(int accepted_socket, msg_t msg)
+{
+  int code;
+  int bytes;
+  char flight_number[MAX_FLIGHT_NUMBER];
+
+  deserialize_string(msg.buffer, flight_number);
+  free(msg.buffer);
+
+  code = db_open();
+  if(code < 0) {
+    printf("error al abrir la db\n");
+  }
+
+  code = db_remove_flight(flight_number);
+
+  if(code < 0)
+    msg.type = RESPONSE_ERROR;
+  else
+    msg.type = RESPONSE_OK;
+
+  msg.bytes = 0;
+
+  bytes = send_msg(accepted_socket, msg);
+
+  if(bytes < 0) {
+    printf("error al escribir en el socket (response)\n");
+  }
+
+  code = db_close(1);
+  if(code < 0) {
+    printf("error al cerrar la db\n");
+  }
   return 0;
 }

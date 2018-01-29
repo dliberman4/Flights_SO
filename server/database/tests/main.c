@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include "../../database/database.h"
-#include "../../types.h"
+#include "../../../protocol/types.h"
 
 void test_db_open()
 {
@@ -230,6 +230,6 @@ int main()
   test_db_get_cancellations_quantity();
   test_db_book_seat();
   test_db_exists_reservation();
-  //test_db_cancel_seat();
+  test_db_cancel_seat();
   test_db_close();
 }
