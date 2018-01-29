@@ -20,6 +20,8 @@ int book_seat_server(int accepted_socket, msg_t msg);
 int cancel_seat_server(int accepted_socket, msg_t msg);
 int new_flight_server(int accepted_socket, msg_t msg);
 int remove_flight_server(int accepted_socket, msg_t msg);
+int get_reservations_server(int accepted_socket, msg_t msg);
+int get_cancellations_server(int accepted_socket, msg_t msg);
 
 int open_socket()
 {
@@ -143,6 +145,12 @@ int main()
                       break;
                   case REMOVE_FLIGHT:
                       code = remove_flight_server(accepted_socket, msg);
+                      break;
+                  case GET_RESERVATIONS:
+                      code = get_reservations_server(accepted_socket, msg);
+                      break;
+                  case GET_CANCELLATIONS:
+                      code = get_cancellations_server(accepted_socket, msg);
                       break;
                   case CLOSE:
                       should_close = 1;
@@ -384,5 +392,99 @@ int remove_flight_server(int accepted_socket, msg_t msg)
   if(code < 0) {
     printf("error al cerrar la db\n");
   }
+  return 0;
+}
+
+int get_reservations_server(int accepted_socket, msg_t msg)
+{
+  int reservations_quantity;
+  reservation_t * reservations;
+  int code;
+  int bytes;
+  unsigned char buffer[MAX_BUF_SIZE];
+  unsigned char * end_of_buffer;
+
+  code = db_open();
+  if(code < 0) {
+    printf("error al abrir la db\n");
+  }
+
+  reservations_quantity = db_get_reservations_quantity(NULL);
+  printf("la cantidad de reservas totales es: %d\n", reservations_quantity);
+
+  reservations = (reservation_t *) malloc(sizeof(reservation_t) * reservations_quantity);
+
+  if(db_get_reservations(NULL, reservations) < 0) {
+    printf("error al obtener las reservas\n");
+  }
+
+  end_of_buffer = serialize_int(buffer, reservations_quantity);
+  end_of_buffer = serialize_reservation_array(end_of_buffer, reservations, reservations_quantity);
+
+  msg.type = GET_RESERVATIONS;
+  msg.bytes = end_of_buffer - buffer;
+  msg.buffer = buffer;
+
+  bytes = send_msg(accepted_socket, msg);
+
+  if(bytes < 0) {
+    printf("error al mandar msg\n");
+  }
+
+  free(reservations);
+  printf("db a punto de cerrarse\n");
+  code = db_close(1);
+  printf("db cerrada\n");
+  if(code < 0) {
+    printf("error al cerrar la db\n");
+  }
+
+  return 0;
+}
+
+int get_cancellations_server(int accepted_socket, msg_t msg)
+{
+  int cancellations_quantity;
+  reservation_t * cancellations;
+  int code;
+  int bytes;
+  unsigned char buffer[MAX_BUF_SIZE];
+  unsigned char * end_of_buffer;
+
+  code = db_open();
+  if(code < 0) {
+    printf("error al abrir la db\n");
+  }
+
+  cancellations_quantity = db_get_cancellations_quantity(NULL);
+  printf("la cantidad de cancelaciones totales es: %d\n", cancellations_quantity);
+
+  cancellations = (reservation_t *) malloc(sizeof(reservation_t) * cancellations_quantity);
+
+  if(db_get_cancellations(NULL, cancellations) < 0) {
+    printf("error al obtener las reservas\n");
+  }
+
+  end_of_buffer = serialize_int(buffer, cancellations_quantity);
+  end_of_buffer = serialize_reservation_array(end_of_buffer, cancellations, cancellations_quantity);
+
+  msg.type = GET_CANCELLATIONS;
+  msg.bytes = end_of_buffer - buffer;
+  msg.buffer = buffer;
+
+  bytes = send_msg(accepted_socket, msg);
+
+  if(bytes < 0) {
+    printf("error al mandar msg\n");
+  }
+
+  free(cancellations);
+  printf("db a punto de cerrarse\n");
+  code = db_close(1);
+  printf("db cerrada\n");
+  if(code < 0) {
+    printf("error al cerrar la db\n");
+  }
+
   return 0;
 }

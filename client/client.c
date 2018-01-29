@@ -18,6 +18,8 @@ int book_seat_client(int client_socket, int choice, char flight_number[MAX_FLIGH
 int cancel_seat_client(int client_socket, int choice, char flight_number[MAX_FLIGHT_NUMBER+1]);
 int new_flight_client(int client_socket, int choice, char flight_number[MAX_FLIGHT_NUMBER+1]);
 int remove_flight_client(int client_socket, int choice, char flight_number[MAX_FLIGHT_NUMBER+1]);
+int get_reservations_client(int client_socket);
+int get_cancellations_client(int client_socket);
 int close_connection(int client_socket, int choice);
 
 int client_socket_initialize(const char * ip)
@@ -123,6 +125,12 @@ int main(int argc, char * argv[])
           break;
         case REMOVE_FLIGHT:
           code = remove_flight_client(client_socket, choice, flight_number);
+          break;
+        case GET_RESERVATIONS:
+          code = get_reservations_client(client_socket);
+          break;
+        case GET_CANCELLATIONS:
+          code = get_cancellations_client(client_socket);
           break;
         case CLOSE:
           code = close_connection(client_socket, choice);
@@ -277,7 +285,7 @@ int book_seat_client(int client_socket, int choice, char flight_number[MAX_FLIGH
   code = get_flight_state_client(client_socket, GET_FLIGHT_STATE, flight_number);
   if(code < 0)
     return ERROR;
-    
+
   return 0;
 }
 
@@ -435,6 +443,85 @@ int remove_flight_client(int client_socket, int choice, char flight_number[MAX_F
   else if(msg.type == RESPONSE_OK) {
     printf("Vuelo eliminado con éxito!\n");
   }
+  return 0;
+}
+int get_reservations_client(int client_socket)
+{
+  msg_t msg;
+  int reservations_quantity;
+  reservation_t * reservations;
+  unsigned char * end_of_buffer;
+  int i;
+  int bytes;
+
+  msg.type = GET_RESERVATIONS;
+  msg.bytes = 0;
+
+  bytes = send_msg(client_socket, msg);
+  if(bytes < 0) {
+    printf("error al escribir en el socket\n");
+    return ERROR;
+  }
+
+  bytes = receive_msg(client_socket, &msg);
+  if(bytes < 0) {
+    printf("error al leer del socket\n");
+    return ERROR;
+  }
+
+  end_of_buffer = deserialize_int(msg.buffer, &reservations_quantity);
+  printf("hay %d reservas\n", reservations_quantity);
+  reservations = (reservation_t *) malloc(sizeof(reservation_t) * reservations_quantity);
+
+  end_of_buffer = deserialize_reservation_array(end_of_buffer, reservations, reservations_quantity);
+
+  free(msg.buffer);
+
+  for(i = 0; i < reservations_quantity; i++) {
+    printf("dni: %d, fila: %d, col: %d\n", reservations[i].dni, reservations[i].seat_row, reservations[i].seat_col);
+  }
+
+  free(reservations);
+  return 0;
+}
+
+int get_cancellations_client(int client_socket)
+{
+  msg_t msg;
+  int cancellations_quantity;
+  reservation_t * cancellations;
+  unsigned char * end_of_buffer;
+  int i;
+  int bytes;
+
+  msg.type = GET_CANCELLATIONS;
+  msg.bytes = 0;
+
+  bytes = send_msg(client_socket, msg);
+  if(bytes < 0) {
+    printf("error al escribir en el socket\n");
+    return ERROR;
+  }
+
+  bytes = receive_msg(client_socket, &msg);
+  if(bytes < 0) {
+    printf("error al leer del socket\n");
+    return ERROR;
+  }
+
+  end_of_buffer = deserialize_int(msg.buffer, &cancellations_quantity);
+  printf("hay %d cancelaciones\n", cancellations_quantity);
+  cancellations = (reservation_t *) malloc(sizeof(reservation_t) * cancellations_quantity);
+
+  end_of_buffer = deserialize_reservation_array(end_of_buffer, cancellations, cancellations_quantity);
+
+  free(msg.buffer);
+
+  for(i = 0; i < cancellations_quantity; i++) {
+    printf("dni: %d, fila: %d, col: %d\n", cancellations[i].dni, cancellations[i].seat_row, cancellations[i].seat_col);
+  }
+
+  free(cancellations);
 
   return 0;
 }
