@@ -24,7 +24,7 @@ int main(int argc, char * argv[])
       return 1;
     }
     should_close = 0;
-
+    show_title();
     while(!should_close) {
       choice = show_menu();
 

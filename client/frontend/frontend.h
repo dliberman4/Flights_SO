@@ -3,6 +3,7 @@
 
 #include "../../protocol/types.h"
 int show_menu();
+void show_title();
 
 void print_error_msg(char * msg);
 void print_ok_msg(char * msg);

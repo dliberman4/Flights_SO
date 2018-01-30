@@ -11,20 +11,37 @@
 #define GREEN_COLOR "\x1B[32m"
 #define DEFAULT_COLOR "\x1B[0m"
 #define RED_COLOR "\x1B[31m"
+#define BLUE_COLOR "\x1B[34m"
+
+void show_title()
+{
+  printf(
+          "  ______ _ _       _     _       \n"
+          " |  ____| (_)     | |   | |      \n"
+          " | |__  | |_  __ _| |__ | |_ ___ \n"
+          " |  __| | | |/ _` | '_ \\| __/ __|\n"
+          " | |    | | | (_| | | | | |_\\__ \\\n"
+          " |_|    |_|_|\\__, |_| |_|\\__|___/\n"
+          "              __/ |              \n"
+          "             |___/               \n"
+);
+}
 
 int show_menu()
 {
   int choice;
 
-  printf("Introduzca el numero de operacion:\n"
-  "1: Obtener el estado de vuelo.\n"
-  "2: Reservar asiento.\n"
-  "3: Cancelar reserva de asiento.\n"
-  "4: Crear nuevo vuelo\n"
-  "5: Eliminar un vuelo\n"
-  "6: Obtener reservas\n"
-  "7: Obtener cancelaciones\n"
-  "8: Salir\n");
+  printf("---------------------------------\n");
+  printf(BLUE_COLOR"1:"DEFAULT_COLOR" Obtener el estado de vuelo.\n"
+  BLUE_COLOR"2:"DEFAULT_COLOR" Reservar asiento.\n"
+  BLUE_COLOR"3:"DEFAULT_COLOR" Cancelar reserva de asiento.\n"
+  BLUE_COLOR"4:"DEFAULT_COLOR" Crear nuevo vuelo\n"
+  BLUE_COLOR"5:"DEFAULT_COLOR" Eliminar un vuelo\n"
+  BLUE_COLOR"6:"DEFAULT_COLOR" Obtener reservas\n"
+  BLUE_COLOR"7:"DEFAULT_COLOR" Obtener cancelaciones\n"
+  BLUE_COLOR"8:"DEFAULT_COLOR" Salir\n"
+  "---------------------------------\n"
+  "Introduzca el numero de operacion:"BLUE_COLOR"\n> "DEFAULT_COLOR);
 
   scanf("%d", &choice);
   while(choice < 1 || choice > MAX_CHOICE) {
@@ -114,11 +131,13 @@ void print_DAV(int dim[2], reservation_t * reservations, int reservations_quanti
 void get_flight_number(char * flight_number)
 {
   char buffer[FLIGHT_NUMBER_TOO_LONG+1];
+  int code;
 
-  printf("Ingrese el numero de vuelo\n");
+  printf("Ingrese el numero de vuelo\n"BLUE_COLOR"> "DEFAULT_COLOR);
   scanf("%"STR(FLIGHT_NUMBER_TOO_LONG)"s", buffer);
   while(strlen(buffer) > MAX_FLIGHT_NUMBER) {
-    printf("Ese numero no es válido. Ingrese máximo %d caracteres\n", MAX_FLIGHT_NUMBER);
+    while ((code = getchar()) != '\n' && code != EOF) { }
+    printf("Ese numero no es válido. Ingrese máximo %d caracteres\n"BLUE_COLOR"> "DEFAULT_COLOR, MAX_FLIGHT_NUMBER);
     scanf("%s", buffer);
   }
   strcpy(flight_number, buffer);
@@ -129,11 +148,11 @@ int get_int(char * msg, char * error_msg)
   int code;
   int num;
 
-  printf("%s\n", msg);
+  printf("%s\n"BLUE_COLOR"> "DEFAULT_COLOR, msg);
   code = scanf("%d", &num);
   while(code != 1 || num < 0) {
     while ((code = getchar()) != '\n' && code != EOF) { }
-    print_error_msg(error_msg);
+    printf("%s\n"BLUE_COLOR"> "DEFAULT_COLOR, error_msg);
     code = scanf("%d", &num);
   }
 
@@ -145,11 +164,11 @@ void get_seat(int * row, int * col)
   char aux_col;
   int code;
 
-  printf("Ingrese el asiento\n");
+  printf("Ingrese el asiento\n"BLUE_COLOR"> "DEFAULT_COLOR);
   code = scanf("%d%1[a-zA-Z]", row, &aux_col);
   while(code != 2) {
     while ((code = getchar()) != '\n' && code != EOF) { }
-    printf("Ese no es un asiento válido. Ingréselo nuevamente.\n");
+    printf("Ese no es un asiento válido. Ingréselo nuevamente.\n"BLUE_COLOR"> "DEFAULT_COLOR);
     code = scanf("%d%1[a-zA-Z]", row, &aux_col);
   }
   *col = aux_col - (islower(aux_col)  ? 'a' : 'A');
