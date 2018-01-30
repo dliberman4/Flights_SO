@@ -104,6 +104,7 @@ void become_daemon()
       close(1);
       dup(log_file);
       lseek(log_file, 0, SEEK_END);
+      colors_off();
       printf("Server started: %d-%d-%d %d:%d:%d\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
       break;
   }

@@ -48,3 +48,8 @@ Server started: 2018-1-30 20:21:14
 [32mOK: [0mNuevo cliente
 [32mOK: [0mCliente desconectado. Fin del proceso.
 [32mOK: [0mCliente desconectado. Fin del proceso.
+Server started: 2018-1-30 20:30:22
+OK: Nuevo cliente
+OK: Nuevo cliente
+OK: Cliente desconectado. Fin del proceso.
+OK: Cliente desconectado. Fin del proceso.
