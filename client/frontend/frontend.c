@@ -55,14 +55,19 @@ void print_flight(flight_t * flight)
 
 void print_reservation(reservation_t * reservation)
 {
-  printf("%-15s | %-4d | %-7d | %d\n",
-  reservation->flight_number, reservation->seat_row,
-  reservation->seat_col, reservation->dni);
+  printf("%-15s | %-4d | %-7c | %d\n",
+  reservation->flight_number, reservation->seat_row+1,
+  reservation->seat_col+'A', reservation->dni);
 }
 
 void print_reservations(reservation_t * reservations, int quantity)
 {
   int i;
+
+  if(quantity == 0) {
+    print_ok_msg("No hay datos para mostrar.");
+    return;
+  }
 
   printf("Número de vuelo | Fila | Columna | DNI\n");
   for(i = 0; i < quantity; i++) {
