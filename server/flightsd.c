@@ -69,8 +69,6 @@ int main()
   int listener_socket;
   int accepted_socket;
   int bytes;
-  int code;
-  int should_close;
   msg_t msg;
   socklen_t address_size;
   struct sockaddr_storage client;
@@ -118,56 +116,47 @@ int main()
       case 0:
               close(listener_socket);
               printf("H: soy el hijo\nH: atendiendo al cliente\n");
-              should_close = 0;
 
-              while(!should_close) {
+              while(1) {
                 printf("esperando recibir msg\n");
                 bytes = receive_msg(accepted_socket, &msg);
-
+                printf("bytes: %d\n", bytes);
                 if(bytes < 0) {
                   printf("error al leer del socket\n");
                   return ERROR_SERVER;
+                }
+                if(bytes <= 0) {
+                  printf("adios!\n");
+                  close(accepted_socket);
+                  exit(0);
                 }
 
                 printf("msg.type = %d\n", msg.type);
                 switch(msg.type) {
                   case GET_FLIGHT_STATE:
-                      code = get_flight_state_server(accepted_socket, msg);
+                      get_flight_state_server(accepted_socket, msg);
                       break;
                   case BOOK_SEAT:
-                      code = book_seat_server(accepted_socket, msg);
+                      book_seat_server(accepted_socket, msg);
                       break;
                   case CANCEL_SEAT:
-                      code = cancel_seat_server(accepted_socket, msg);
+                      cancel_seat_server(accepted_socket, msg);
                       break;
                   case NEW_FLIGHT:
-                      code = new_flight_server(accepted_socket, msg);
+                      new_flight_server(accepted_socket, msg);
                       break;
                   case REMOVE_FLIGHT:
-                      code = remove_flight_server(accepted_socket, msg);
-                      break;
-                  case GET_RESERVATIONS:
-                      code = get_reservations_server(accepted_socket, msg);
+                      remove_flight_server(accepted_socket, msg);
                       break;
                   case GET_CANCELLATIONS:
-                      code = get_cancellations_server(accepted_socket, msg);
+                      get_cancellations_server(accepted_socket, msg);
                       break;
-                  case CLOSE:
-                      should_close = 1;
+                  case GET_RESERVATIONS:
+                      get_reservations_server(accepted_socket, msg);
                       break;
-                  default:
-                      break;
-                }
-
-                if(code < 0){
-                  printf("error: %d\n", code);
                 }
               }
 
-              if(write(accepted_socket, "Ya me dormi. Adios!\n", 20) < 0) {
-                printf("H: error al escribir en el socket\n");
-              }
-              close(accepted_socket);
               printf("H: mi trabajo termino. Adios!\n");
               exit(0);
               break;

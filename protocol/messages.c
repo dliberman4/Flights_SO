@@ -32,6 +32,9 @@ int receive_msg(int socket, msg_t * msg)
   unsigned char * ptr;
 
   bytes = read(socket, buffer, MAX_BUF_SIZE);
+  if(bytes <= 0)
+    return bytes;
+    
   ptr = deserialize_int(buffer, &msg->type);
   ptr = deserialize_int(ptr, &msg->bytes);
   msg->buffer = (unsigned char *)malloc(msg->bytes);

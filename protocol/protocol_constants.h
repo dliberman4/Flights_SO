@@ -15,6 +15,6 @@
 #define CLOSE 8
 #define MAX_CHOICE 8
 
-#define DEBUG_PRINTS 0
+//#define DEBUG_PRINTS 0
 
 #endif
