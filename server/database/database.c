@@ -36,7 +36,7 @@ int db_close(int should_wait)
     while(code == SQLITE_BUSY) {
       stmt = sqlite3_next_stmt(db_connection, NULL);
       if(stmt)
-        sqlite3_finalize(stmt);	
+        sqlite3_finalize(stmt);
       code = sqlite3_close(db_connection);
     }
   }
@@ -51,6 +51,9 @@ int db_check_tables() {
   char * query;
   sqlite3_stmt * statement;
 
+  if(db_open() == DB_ERROR)
+    return DB_ERROR;
+
   query = "select * from flight, reservation, cancellation;";
 
   code = sqlite3_prepare_v2(db_connection, query, -1, &statement, NULL);
@@ -64,6 +67,9 @@ int db_check_tables() {
   if(code == SQLITE_ERROR)
     return DB_WRONG_RESULT;
   if(code != SQLITE_DONE && code != SQLITE_ROW)
+    return DB_ERROR;
+
+  if(db_close(1) == DB_ERROR)
     return DB_ERROR;
 
   return DB_OK;
