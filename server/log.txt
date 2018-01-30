@@ -1,0 +1,50 @@
+now: 2018-1-30 18:51:22
+P: esperando al cliente...
+acepte!
+P: soy el padre, sigo
+P: esperando al cliente...
+H: soy el hijo
+H: atendiendo al cliente
+esperando recibir msg
+bytes: 12
+msg.type = 1
+el vuelo bbb tiene filas: 5 y cols: 5
+la cantidad de reservas es: 6
+db a punto de cerrarse
+db cerrada
+esperando recibir msg
+bytes: 8
+msg.type = 6
+la cantidad de reservas totales es: 6
+db a punto de cerrarse
+db cerrada
+esperando recibir msg
+bytes: 8
+msg.type = 7
+la cantidad de cancelaciones totales es: 0
+db a punto de cerrarse
+db cerrada
+esperando recibir msg
+bytes: 0
+adios!
+now: 2018-1-30 18:52:11
+P: esperando al cliente...
+acepte!
+P: soy el padre, sigo
+P: esperando al cliente...
+H: soy el hijo
+H: atendiendo al cliente
+esperando recibir msg
+bytes: 8
+msg.type = 6
+la cantidad de reservas totales es: 6
+db a punto de cerrarse
+db cerrada
+esperando recibir msg
+bytes: 0
+adios!
+Server started: 2018-1-30 20:21:14
+[32mOK: [0mNuevo cliente
+[32mOK: [0mNuevo cliente
+[32mOK: [0mCliente desconectado. Fin del proceso.
+[32mOK: [0mCliente desconectado. Fin del proceso.

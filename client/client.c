@@ -18,6 +18,10 @@ int main(int argc, char * argv[])
     int code;
     int should_close;
 
+    if(argc != 2) {
+      print_error_msg("Argumentos inválidos. Debe ingresar sólo la IP.");
+      return 1;
+    }
     client_socket = client_socket_initialize(argv[1]);
     if(client_socket == ERROR) {
       print_error_msg("error al crear el socket");

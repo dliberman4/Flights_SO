@@ -17,7 +17,7 @@ int open_socket()
   int s;
 
   if((s = socket(PF_INET, SOCK_STREAM, 0)) < 0) {
-    return ERROR_SERVER;
+    return ERROR;
   }
   return s;
 }
@@ -61,7 +61,7 @@ int main()
   signal(SIGCHLD, sigchld_handler);
 
   listener_socket = open_socket();
-  if(listener_socket == ERROR_SERVER) {
+  if(listener_socket == ERROR) {
     printf("error al crear el socket\n");
     return 1;
   }
