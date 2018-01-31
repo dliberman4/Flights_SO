@@ -42,6 +42,8 @@ int book_seat(int client_socket)
     return ERROR;
   }
 
+  free(msg.buffer);
+
   if(msg.type == RESPONSE_ERROR) {
     print_error_msg("El asiento ingresado no pudo ser reservado.");
   }

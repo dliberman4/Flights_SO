@@ -163,8 +163,8 @@ int get_int(char * msg, char * error_msg)
 
 void get_seat(int * row, int * col)
 {
-  char aux_col;
   int code;
+  char aux_col;
 
   printf("Ingrese el asiento\n"BLUE_COLOR"> "DEFAULT_COLOR);
   code = scanf("%d%1[a-zA-Z]", row, &aux_col);
