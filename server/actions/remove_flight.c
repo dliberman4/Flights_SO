@@ -19,6 +19,7 @@ int remove_flight(int accepted_socket, msg_t msg)
   code = db_open();
   if(code < 0) {
     print_error_msg("Al abrir la db");
+    return ERROR;
   }
 
   code = db_remove_flight(flight_number);

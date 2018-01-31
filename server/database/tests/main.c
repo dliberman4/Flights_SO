@@ -55,6 +55,11 @@ void test_db_remove_flight()
     printf("db_remove_flight OK!\n");
   else
     printf("db_remove_flight not working :(\n");
+    /*vuelo no existente*/
+  if(db_remove_flight("CCC22") == DB_OK)
+    printf("db_remove_flight not working when trying to remove missing flight :(\n");
+  else
+    printf("db_remove_flight OK!\n");
   db_close(1);
 }
 

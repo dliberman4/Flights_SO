@@ -53,3 +53,7 @@ OK: Nuevo cliente
 OK: Nuevo cliente
 OK: Cliente desconectado. Fin del proceso.
 OK: Cliente desconectado. Fin del proceso.
+Server started: 2018-1-30 21:15:20
+OK: Nuevo cliente
+Error: Al pedir las dimensiones
+OK: Cliente desconectado. Fin del proceso.

@@ -30,6 +30,7 @@ void show_title()
 int show_menu()
 {
   int choice;
+  int code;
 
   printf("---------------------------------\n");
   printf(BLUE_COLOR"1:"DEFAULT_COLOR" Obtener el estado de vuelo.\n"
@@ -45,7 +46,8 @@ int show_menu()
 
   scanf("%d", &choice);
   while(choice < 1 || choice > MAX_CHOICE) {
-    printf("Esa opción no es correcta. Ingrese otra.\n");
+    while ((code = getchar()) != '\n' && code != EOF) { }
+    printf("Esa opción no es correcta. Ingrese otra."BLUE_COLOR"\n> "DEFAULT_COLOR);
     scanf("%d", &choice);
   }
 

@@ -140,8 +140,12 @@ int db_remove_flight(const char * flight_number)
 {
   int code;
   char * query;
+  int dim[2];
   sqlite3_stmt * statement;
 
+  if(db_get_flight_dim(flight_number, dim) < 0) {
+    return DB_WRONG_RESULT;
+  }
   query = "delete from flight where flight_number = ?;";
 
   code = sqlite3_prepare_v2(db_connection, query, -1, &statement, NULL);
