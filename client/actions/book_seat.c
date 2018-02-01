@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "actions.h"
 #include "../../protocol/messages.h"
 #include "../../protocol/serializer.h"

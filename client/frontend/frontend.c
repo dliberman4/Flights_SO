@@ -164,15 +164,15 @@ int get_int(char * msg, char * error_msg)
 void get_seat(int * row, int * col)
 {
   int code;
-  char aux_col;
+  char aux_col[2];
 
   printf("Ingrese el asiento\n"BLUE_COLOR"> "DEFAULT_COLOR);
-  code = scanf("%d%1[a-zA-Z]", row, &aux_col);
+  code = scanf("%d%1[a-zA-Z]", row, aux_col);
   while(code != 2) {
     while ((code = getchar()) != '\n' && code != EOF) { }
     printf("Ese no es un asiento válido. Ingréselo nuevamente.\n"BLUE_COLOR"> "DEFAULT_COLOR);
-    code = scanf("%d%1[a-zA-Z]", row, &aux_col);
+    code = scanf("%d%1[a-zA-Z]", row, aux_col);
   }
-  *col = aux_col - (islower(aux_col)  ? 'a' : 'A');
+  *col = aux_col[0] - (islower(aux_col[0])  ? 'a' : 'A');
   (*row)--;
 }
