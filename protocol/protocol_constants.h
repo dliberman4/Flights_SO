@@ -5,6 +5,7 @@
 #define MAX_BUF_SIZE 1024
 #define RESPONSE_OK 0
 #define RESPONSE_ERROR -1
+#define CHECK_CONNECTION 9
 #define GET_FLIGHT_STATE 1
 #define BOOK_SEAT 2
 #define CANCEL_SEAT 3

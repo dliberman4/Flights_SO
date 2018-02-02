@@ -1,7 +1,9 @@
-#include "database.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#include "database.h"
+#include "../utils/utils.h"
 
 #define MAX_QUERY_LENGTH 255
 
@@ -81,6 +83,8 @@ int db_new_flight(const char * flight_number, int plane_rows, int plane_cols)
   char * query;
   sqlite3_stmt * statement;
 
+  wait_semaphore(DATABASE_SEM);
+
   query = "insert into flight values (?, ?, ?);";
 
   code = sqlite3_prepare_v2(db_connection, query, -1, &statement, NULL);
@@ -94,6 +98,8 @@ int db_new_flight(const char * flight_number, int plane_rows, int plane_cols)
 
   code = sqlite3_step(statement);
   sqlite3_finalize(statement);
+
+  post_semaphore(DATABASE_SEM);
 
   if(code == SQLITE_ERROR)
     return DB_WRONG_RESULT;
@@ -146,6 +152,9 @@ int db_remove_flight(const char * flight_number)
   if(db_get_flight_dim(flight_number, dim) < 0) {
     return DB_WRONG_RESULT;
   }
+
+  wait_semaphore(DATABASE_SEM);
+
   query = "delete from flight where flight_number = ?;";
 
   code = sqlite3_prepare_v2(db_connection, query, -1, &statement, NULL);
@@ -157,6 +166,8 @@ int db_remove_flight(const char * flight_number)
 
   code = sqlite3_step(statement);
   sqlite3_finalize(statement);
+
+  post_semaphore(DATABASE_SEM);
 
   if(code == SQLITE_ERROR)
     return DB_WRONG_RESULT;
@@ -351,6 +362,8 @@ int db_book_seat(reservation_t * reservation)
   )
     return DB_WRONG_RESULT;
 
+  wait_semaphore(DATABASE_SEM);
+
   query = "insert into reservation values (?, ?, ?, ?);";
 
   code = sqlite3_prepare_v2(db_connection, query, -1, &statement, NULL);
@@ -365,6 +378,8 @@ int db_book_seat(reservation_t * reservation)
 
   code = sqlite3_step(statement);
   sqlite3_finalize(statement);
+
+  post_semaphore(DATABASE_SEM);
 
   if(code == SQLITE_ERROR)
     return DB_WRONG_RESULT;
@@ -383,6 +398,8 @@ int db_cancel_seat(reservation_t * reservation)
   if(db_exists_reservation(reservation) != 1)
     return DB_WRONG_RESULT;
 
+  wait_semaphore(DATABASE_SEM);
+
   query = "delete from reservation where flight_number = ? and seat_row = ? and seat_col = ? and dni = ?;";
 
   code = sqlite3_prepare_v2(db_connection, query, -1, &statement, NULL);
@@ -398,17 +415,23 @@ int db_cancel_seat(reservation_t * reservation)
   code = sqlite3_step(statement);
   sqlite3_finalize(statement);
 
-  if(code == SQLITE_ERROR)
+  if(code == SQLITE_ERROR) {
+    post_semaphore(DATABASE_SEM);
     return DB_WRONG_RESULT;
-  if(code != SQLITE_DONE && code != SQLITE_ROW)
+  }
+  if(code != SQLITE_DONE && code != SQLITE_ROW) {
+    post_semaphore(DATABASE_SEM);
     return DB_ERROR;
+  }
 
   query = "insert into cancellation values (?, ?, ?, ?);";
 
   code = sqlite3_prepare_v2(db_connection, query, -1, &statement, NULL);
 
-  if(code != SQLITE_OK && code != SQLITE_ROW)
+  if(code != SQLITE_OK && code != SQLITE_ROW) {
+    post_semaphore(DATABASE_SEM);
     return DB_ERROR;
+  }
 
   sqlite3_bind_text(statement, 1, reservation->flight_number, -1, NULL);
   sqlite3_bind_int(statement, 2, reservation->seat_row);
@@ -418,5 +441,6 @@ int db_cancel_seat(reservation_t * reservation)
   code = sqlite3_step(statement);
   sqlite3_finalize(statement);
 
+  post_semaphore(DATABASE_SEM);
   return DB_OK;
 }

@@ -29,6 +29,12 @@ int main(int argc, char * argv[])
     }
     should_close = 0;
     show_title();
+
+    print_ok_msg("Conectando...");
+    if(check_connection(client_socket) < 0) {
+      return 1;
+    }
+
     while(!should_close) {
       choice = show_menu();
 

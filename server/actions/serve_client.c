@@ -2,25 +2,26 @@
 #include <unistd.h>
 
 #include "../../protocol/messages.h"
+#include "../../protocol/protocol_constants.h"
 #include "actions.h"
 #include "../log/log.h"
 #include "../constants.h"
 
-void serve_client(int accepted_socket)
+int serve_client(int accepted_socket)
 {
   int bytes;
   msg_t msg;
-  
+
   while(1) {
     bytes = receive_msg(accepted_socket, &msg);
     if(bytes < 0) {
       print_error_msg("Al leer del socket");
-      exit(1);
+      return 1;
     }
     if(bytes == 0) {
       print_ok_msg("Cliente desconectado. Fin del proceso.");
       close(accepted_socket);
-      exit(0);
+      return 0;
     }
 
     switch(msg.type) {
@@ -44,6 +45,9 @@ void serve_client(int accepted_socket)
           break;
       case GET_RESERVATIONS:
           get_reservations(accepted_socket, msg);
+          break;
+      case CHECK_CONNECTION:
+          connection_advice(accepted_socket, msg);
           break;
     }
   }

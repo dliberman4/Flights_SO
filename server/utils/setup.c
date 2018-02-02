@@ -11,7 +11,7 @@
 
 #include "../log/log.h"
 #include "../constants.h"
-#include "setup.h"
+#include "utils.h"
 
 int init_socket()
 {
@@ -82,6 +82,16 @@ void sigchld_handler(int sig)
   while (waitpid(-1, 0, WNOHANG) > 0)
   ;
   return;
+}
+
+void close_handler(int sig)
+{
+  if(close_semaphores() < 0){
+    print_error_msg("Al cerrar los semáforos");
+    exit(1);
+  }
+  print_ok_msg("Finalizó el server");
+  exit(0);
 }
 
 void become_daemon()
