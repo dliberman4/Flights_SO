@@ -86,8 +86,8 @@ void sigchld_handler(int sig)
 
 void close_handler(int sig)
 {
-  if(close_semaphores() < 0){
-    print_error_msg("Al cerrar los semáforos");
+  if(terminate_semaphores() < 0){
+    print_error_msg("aqui:Al cerrar los semáforos");
     exit(1);
   }
   printf("============ Finalizó el server. ============\n\n");

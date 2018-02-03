@@ -19,14 +19,14 @@ int get_reservations(int client_socket)
 
   bytes = send_msg(client_socket, msg);
   if(bytes < 0) {
-    print_error_msg("Escribiendo en el socket");
-    return ERROR;
+    print_error_msg("Conexión perdida");
+    return FATAL_ERROR;
   }
 
   bytes = receive_msg(client_socket, &msg);
-  if(bytes < 0) {
-    print_error_msg("Leyendo del socket");
-    return ERROR;
+  if(bytes <= 0) {
+    print_error_msg("Conexión perdida");
+    return FATAL_ERROR;
   }
 
   end_of_buffer = deserialize_int(msg.buffer, &reservations_quantity);

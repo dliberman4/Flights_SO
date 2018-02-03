@@ -22,14 +22,14 @@ int remove_flight(int client_socket)
 
   bytes = send_msg(client_socket, msg);
   if(bytes < 0) {
-    print_error_msg("Acción no realizada. Intentelo mas tarde.");
-    return ERROR;
+    print_error_msg("Conexión perdida");
+    return FATAL_ERROR;
   }
 
   bytes = receive_msg(client_socket, &msg);
-  if(bytes < 0) {
-    print_error_msg("Leyendo del socket");
-    return ERROR;
+  if(bytes <= 0) {
+    print_error_msg("Conexión perdida");
+    return FATAL_ERROR;
   }
 
   if(msg.type == RESPONSE_ERROR) {

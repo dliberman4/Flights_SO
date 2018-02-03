@@ -24,7 +24,7 @@ int main(int argc, char * argv[])
     }
     client_socket = client_socket_initialize(argv[1]);
     if(client_socket == ERROR) {
-      print_error_msg("error al crear el socket");
+      print_error_msg("Conexión perdida");
       return 1;
     }
     should_close = 0;
@@ -63,6 +63,9 @@ int main(int argc, char * argv[])
         case CLOSE:
           should_close = 1;
           break;
+      }
+      if(code == FATAL_ERROR) {
+        should_close = 1;
       }
     }
 

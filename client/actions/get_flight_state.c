@@ -35,14 +35,14 @@ int get_flight_state(int client_socket, char * flight_number)
 
   bytes = send_msg(client_socket, msg);
   if(bytes < 0) {
-    print_error_msg("Acción no realizada. Inténtelo mas tarde.");
-    return ERROR;
+    print_error_msg("Conexión perdida");
+    return FATAL_ERROR;
   }
 
   bytes = receive_msg(client_socket, &msg);
-  if(bytes < 0) {
-    print_error_msg("error al leer del socket");
-    return ERROR;
+  if(bytes <= 0) {
+    print_error_msg("Conexión perdida");
+    return FATAL_ERROR;
   }
 
   if(msg.type == RESPONSE_ERROR) {

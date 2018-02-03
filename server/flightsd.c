@@ -42,7 +42,7 @@ int main(int argc, char * argv[])
   /* sempaphores initialization */
   if(init_semaphores() < 0) {
     print_error_msg("Al inicializar los semáforos");
-    close_semaphores();
+    terminate_semaphores();
     return 1;
   }
 
@@ -60,6 +60,8 @@ int main(int argc, char * argv[])
               close(listener_socket);
               ret = serve_client(accepted_socket);
               post_semaphore(CHILD_SEM);
+              /* free semaphores resources */
+              close_semaphores();
               return ret;
               break;
       case -1:

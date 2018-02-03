@@ -16,5 +16,6 @@ int init_semaphores();
 int wait_semaphore(int sem);
 int post_semaphore(int sem);
 int close_semaphores();
+int terminate_semaphores();
 
 #endif

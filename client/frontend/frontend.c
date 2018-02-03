@@ -29,7 +29,7 @@ void show_title()
 
 int show_menu()
 {
-  int choice;
+  int choice = 0;
   int code;
 
   printf("---------------------------------\n");
@@ -46,11 +46,11 @@ int show_menu()
 
   scanf("%d", &choice);
   while(choice < 1 || choice > MAX_CHOICE) {
-    while ((code = getchar()) != '\n' && code != EOF) { }
     printf("Esa opción no es correcta. Ingrese otra."BLUE_COLOR"\n> "DEFAULT_COLOR);
+    while ((code = getchar()) != EOF && code != '\n') { }
     scanf("%d", &choice);
   }
-
+  while ((code = getchar()) != EOF && code != '\n') { }
   return choice;
 }
 
@@ -138,11 +138,12 @@ void get_flight_number(char * flight_number)
   printf("Ingrese el numero de vuelo\n"BLUE_COLOR"> "DEFAULT_COLOR);
   scanf("%"STR(FLIGHT_NUMBER_TOO_LONG)"s", buffer);
   while(strlen(buffer) > MAX_FLIGHT_NUMBER) {
-    while ((code = getchar()) != '\n' && code != EOF) { }
     printf("Ese numero no es válido. Ingrese máximo %d caracteres\n"BLUE_COLOR"> "DEFAULT_COLOR, MAX_FLIGHT_NUMBER);
+    while ((code = getchar()) != '\n' && code != EOF) { }
     scanf("%s", buffer);
   }
   strcpy(flight_number, buffer);
+  while ((code = getchar()) != EOF && code != '\n') { }
 }
 
 int get_int(char * msg, char * error_msg)
@@ -153,11 +154,11 @@ int get_int(char * msg, char * error_msg)
   printf("%s\n"BLUE_COLOR"> "DEFAULT_COLOR, msg);
   code = scanf("%d", &num);
   while(code != 1 || num < 0) {
-    while ((code = getchar()) != '\n' && code != EOF) { }
     printf("%s\n"BLUE_COLOR"> "DEFAULT_COLOR, error_msg);
+    while ((code = getchar()) != EOF && code != '\n') { }
     code = scanf("%d", &num);
   }
-
+  while ((code = getchar()) != EOF && code != '\n') { }
   return num;
 }
 
@@ -169,10 +170,12 @@ void get_seat(int * row, int * col)
   printf("Ingrese el asiento\n"BLUE_COLOR"> "DEFAULT_COLOR);
   code = scanf("%d%1[a-zA-Z]", row, aux_col);
   while(code != 2) {
-    while ((code = getchar()) != '\n' && code != EOF) { }
     printf("Ese no es un asiento válido. Ingréselo nuevamente.\n"BLUE_COLOR"> "DEFAULT_COLOR);
+    while ((code = getchar()) != '\n' && code != EOF) { }
     code = scanf("%d%1[a-zA-Z]", row, aux_col);
   }
   *col = aux_col[0] - (islower(aux_col[0])  ? 'a' : 'A');
   (*row)--;
+
+  while ((code = getchar()) != EOF && code != '\n') { }
 }

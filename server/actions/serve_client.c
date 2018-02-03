@@ -16,6 +16,7 @@ int serve_client(int accepted_socket)
     bytes = receive_msg(accepted_socket, &msg);
     if(bytes < 0) {
       print_error_msg("Al leer del socket");
+      free(msg.buffer);
       return 1;
     }
     if(bytes == 0) {

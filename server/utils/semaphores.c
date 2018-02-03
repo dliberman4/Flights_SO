@@ -50,6 +50,16 @@ int close_semaphores()
 {
   int code = 0;
 
+  code += sem_close(child_sem);
+  code += sem_close(database_sem);
+
+  return code;
+}
+
+int terminate_semaphores()
+{
+  int code = 0;
+
   code += sem_unlink("flights_child_sem");
   code += sem_unlink("flights_database_sem");
   code += sem_close(child_sem);
