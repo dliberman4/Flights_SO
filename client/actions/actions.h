@@ -8,6 +8,7 @@ int new_flight(int client_socket);
 int remove_flight(int client_socket);
 int get_reservations(int client_socket);
 int get_cancellations(int client_socket);
+int get_flights(int client_socket);
 int check_connection(int client_socket);
 
 #endif

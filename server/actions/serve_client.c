@@ -47,6 +47,9 @@ int serve_client(int accepted_socket)
       case GET_RESERVATIONS:
           get_reservations(accepted_socket, msg);
           break;
+      case GET_FLIGHTS:
+          get_flights(accepted_socket, msg);
+          break;
       case CHECK_CONNECTION:
           connection_ack(accepted_socket, msg);
           break;

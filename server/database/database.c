@@ -453,3 +453,60 @@ int db_cancel_seat(reservation_t * reservation)
   post_semaphore(DATABASE_SEM);
   return DB_OK;
 }
+
+int db_get_flights_quantity()
+{
+  int code, quantity;
+  char * query;
+  sqlite3_stmt * statement;
+
+  query = "select count(*) from flight;";
+
+  code = sqlite3_prepare_v2(db_connection, query, -1, &statement, NULL);
+
+  if(code != SQLITE_OK)
+    return DB_ERROR;
+
+  code = sqlite3_step(statement);
+
+  if(code == SQLITE_ERROR) {
+    sqlite3_finalize(statement);
+    return DB_WRONG_RESULT;
+  }
+  if(code != SQLITE_DONE && code != SQLITE_ROW) {
+    sqlite3_finalize(statement);
+    return DB_ERROR;
+  }
+
+  quantity = sqlite3_column_int(statement, 0);
+  sqlite3_finalize(statement);
+  return quantity;
+}
+
+int db_get_flights(flight_t * flights)
+{
+  int code;
+  int i = 0;
+  char * query;
+  sqlite3_stmt * statement;
+
+  query = "select flight_number, plane_rows, plane_cols from flight;";
+  code = sqlite3_prepare_v2(db_connection, query, -1, &statement, NULL);
+
+  if(code != SQLITE_OK)
+    return DB_ERROR;
+
+  while((code = sqlite3_step(statement)) == SQLITE_ROW) {
+    strcpy(flights[i].flight_number, (const char *)sqlite3_column_text(statement, 0));
+    flights[i].dim[0] = sqlite3_column_int(statement, 1);
+    flights[i].dim[1] = sqlite3_column_int(statement, 2);
+    i++;
+  }
+  sqlite3_finalize(statement);
+
+  if(code == SQLITE_ERROR)
+    return DB_WRONG_RESULT;
+  if(code != SQLITE_DONE)
+    return DB_ERROR;
+  return DB_OK;
+}

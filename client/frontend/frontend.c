@@ -40,7 +40,8 @@ int show_menu()
   BLUE_COLOR"5:"DEFAULT_COLOR" Eliminar un vuelo\n"
   BLUE_COLOR"6:"DEFAULT_COLOR" Obtener reservas\n"
   BLUE_COLOR"7:"DEFAULT_COLOR" Obtener cancelaciones\n"
-  BLUE_COLOR"8:"DEFAULT_COLOR" Salir\n"
+  BLUE_COLOR"8:"DEFAULT_COLOR" Obtener vuelos\n"
+  BLUE_COLOR"9:"DEFAULT_COLOR" Salir\n"
   "---------------------------------\n"
   "Introduzca el numero de operacion:"BLUE_COLOR"\n> "DEFAULT_COLOR);
 
@@ -66,10 +67,24 @@ void print_ok_msg(char * msg)
 
 void print_flight(flight_t * flight)
 {
-  printf("Número de vuelo: %s\n"
-  "Cantidad de filas: %d\n"
-  "Cantidad de columnas: %d\n\n",
+  printf("%-15s | %-6d | %-9d\n",
   flight->flight_number, flight->dim[0], flight->dim[1]);
+}
+
+void print_flights(flight_t * flights, int quantity)
+{
+  int i;
+
+  if(quantity == 0) {
+    print_ok_msg("No hay datos para mostrar.");
+    return;
+  }
+
+  printf("Número de vuelo | #Filas | #Columnas\n");
+  for(i = 0; i < quantity; i++) {
+    print_flight(&flights[i]);
+  }
+
 }
 
 void print_reservation(reservation_t * reservation)

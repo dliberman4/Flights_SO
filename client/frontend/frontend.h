@@ -8,6 +8,7 @@ void show_title();
 void print_error_msg(char * msg);
 void print_ok_msg(char * msg);
 void print_flight(flight_t * flight);
+void print_flights(flight_t * flights, int quantity);
 void print_reservation(reservation_t * reservation);
 void print_reservations(reservation_t * reservations, int quantity);
 void print_DAV(int dim[2], reservation_t * reservations, int reservations_quantity);

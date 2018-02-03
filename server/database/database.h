@@ -23,5 +23,7 @@ int db_get_cancellations(const char * flight_number, reservation_t * cancellatio
 int db_book_seat(reservation_t * reservation);
 int db_exists_reservation(reservation_t * reservation);
 int db_cancel_seat(reservation_t * reservation);
+int db_get_flights_quantity();
+int db_get_flights(flight_t * flights);
 
 #endif

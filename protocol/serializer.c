@@ -51,6 +51,15 @@ unsigned char * serialize_flight(unsigned char * buffer, flight_t flight)
   return buffer;
 }
 
+unsigned char * serialize_flight_array(unsigned char * buffer, flight_t * flights, int length)
+{
+  while(length > 0) {
+    buffer = serialize_flight(buffer, *flights++);
+    length--;
+  }
+  return buffer;
+}
+
 /*-------------------------------DESERIALIZERS-------------------------------*/
 unsigned char * deserialize_int(unsigned char * buffer, int * value)
 {
@@ -95,5 +104,14 @@ unsigned char * deserialize_flight(unsigned char * buffer, flight_t * flight)
   buffer = deserialize_string(buffer, flight->flight_number);
   buffer = deserialize_int(buffer, &(flight->dim[0]));
   buffer = deserialize_int(buffer, &(flight->dim[1]));
+  return buffer;
+}
+
+unsigned char * deserialize_flight_array(unsigned char * buffer, flight_t * flights, int length)
+{
+  while(length > 0) {
+    buffer = deserialize_flight(buffer, flights++);
+    length--;
+  }
   return buffer;
 }

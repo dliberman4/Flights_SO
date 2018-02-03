@@ -60,6 +60,9 @@ int main(int argc, char * argv[])
         case GET_CANCELLATIONS:
           code = get_cancellations(client_socket);
           break;
+        case GET_FLIGHTS:
+          code = get_flights(client_socket);
+          break;
         case CLOSE:
           should_close = 1;
           break;
