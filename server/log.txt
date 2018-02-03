@@ -1,65 +1,20 @@
-now: 2018-1-30 18:51:22
-P: esperando al cliente...
-acepte!
-P: soy el padre, sigo
-P: esperando al cliente...
-H: soy el hijo
-H: atendiendo al cliente
-esperando recibir msg
-bytes: 12
-msg.type = 1
-el vuelo bbb tiene filas: 5 y cols: 5
-la cantidad de reservas es: 6
-db a punto de cerrarse
-db cerrada
-esperando recibir msg
-bytes: 8
-msg.type = 6
-la cantidad de reservas totales es: 6
-db a punto de cerrarse
-db cerrada
-esperando recibir msg
-bytes: 8
-msg.type = 7
-la cantidad de cancelaciones totales es: 0
-db a punto de cerrarse
-db cerrada
-esperando recibir msg
-bytes: 0
-adios!
-now: 2018-1-30 18:52:11
-P: esperando al cliente...
-acepte!
-P: soy el padre, sigo
-P: esperando al cliente...
-H: soy el hijo
-H: atendiendo al cliente
-esperando recibir msg
-bytes: 8
-msg.type = 6
-la cantidad de reservas totales es: 6
-db a punto de cerrarse
-db cerrada
-esperando recibir msg
-bytes: 0
-adios!
-Server started: 2018-1-30 20:21:14
-[32mOK: [0mNuevo cliente
-[32mOK: [0mNuevo cliente
-[32mOK: [0mCliente desconectado. Fin del proceso.
-[32mOK: [0mCliente desconectado. Fin del proceso.
-Server started: 2018-1-30 20:30:22
-OK: Nuevo cliente
-OK: Nuevo cliente
-OK: Cliente desconectado. Fin del proceso.
-OK: Cliente desconectado. Fin del proceso.
-Server started: 2018-1-30 21:15:20
-OK: Nuevo cliente
-Error: Al pedir las dimensiones
-OK: Cliente desconectado. Fin del proceso.
-Server started: 2018-1-30 22:57:3
-OK: Nuevo cliente
-OK: Cliente desconectado. Fin del proceso.
-Server started: 2018-1-31 0:31:13
-OK: Nuevo cliente
-OK: Cliente desconectado. Fin del proceso.
+==== Server started: 2018- 2- 3  1:23:11 ====
+OK: listener_socket creado
+OK: bind
+============ Finalizó el server. ============
+
+==== Server started: 2018- 2- 3  1:23:17 ====
+OK: listener_socket creado
+OK: bind
+============ Finalizó el server. ============
+
+==== Server started: 2018- 2- 3  1:23:20 ====
+OK: listener_socket creado
+OK: bind
+============ Finalizó el server. ============
+
+==== Server started: 2018-02-03 01:24:22 ====
+OK: listener_socket creado
+OK: bind
+============ Finalizó el server. ============
+

@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include <string.h>
 #include <unistd.h>
 #include <sys/signal.h>
@@ -41,6 +42,7 @@ int main(int argc, char * argv[])
   /* sempaphores initialization */
   if(init_semaphores() < 0) {
     print_error_msg("Al inicializar los semáforos");
+    close_semaphores();
     return 1;
   }
 
@@ -52,6 +54,7 @@ int main(int argc, char * argv[])
     if(accepted_socket < 0) {
       return 1;
     }
+    fflush(0);
     switch(fork()) {
       case 0:
               close(listener_socket);

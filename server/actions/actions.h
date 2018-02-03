@@ -10,7 +10,7 @@ int new_flight(int accepted_socket, msg_t msg);
 int remove_flight(int accepted_socket, msg_t msg);
 int get_reservations(int accepted_socket, msg_t msg);
 int get_cancellations(int accepted_socket, msg_t msg);
-int connection_advice(int accepted_socket, msg_t msg);
+int connection_ack(int accepted_socket, msg_t msg);
 
 int serve_client(int accepted_socket);
 

@@ -47,7 +47,7 @@ int serve_client(int accepted_socket)
           get_reservations(accepted_socket, msg);
           break;
       case CHECK_CONNECTION:
-          connection_advice(accepted_socket, msg);
+          connection_ack(accepted_socket, msg);
           break;
     }
   }

@@ -90,7 +90,7 @@ void close_handler(int sig)
     print_error_msg("Al cerrar los semáforos");
     exit(1);
   }
-  print_ok_msg("Finalizó el server");
+  printf("============ Finalizó el server. ============\n\n");
   exit(0);
 }
 
@@ -115,7 +115,7 @@ void become_daemon()
       dup(log_file);
       lseek(log_file, 0, SEEK_END);
       colors_off();
-      printf("Server started: %d-%d-%d %d:%d:%d\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
+      printf("==== Server started: %d-%02d-%02d %02d:%02d:%02d ====\n", tm.tm_year + 1900, tm.tm_mon + 1, tm.tm_mday, tm.tm_hour, tm.tm_min, tm.tm_sec);
       break;
   }
 }

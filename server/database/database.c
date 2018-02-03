@@ -89,8 +89,10 @@ int db_new_flight(const char * flight_number, int plane_rows, int plane_cols)
 
   code = sqlite3_prepare_v2(db_connection, query, -1, &statement, NULL);
 
-  if(code != SQLITE_OK)
+  if(code != SQLITE_OK) {
+    post_semaphore(DATABASE_SEM);
     return DB_ERROR;
+  }
 
   sqlite3_bind_text(statement, 1, flight_number, -1, NULL);
   sqlite3_bind_int(statement, 2, plane_rows);
@@ -159,8 +161,10 @@ int db_remove_flight(const char * flight_number)
 
   code = sqlite3_prepare_v2(db_connection, query, -1, &statement, NULL);
 
-  if(code != SQLITE_OK)
+  if(code != SQLITE_OK) {
+    post_semaphore(DATABASE_SEM);
     return DB_ERROR;
+  }
 
   sqlite3_bind_text(statement, 1, flight_number, -1, NULL);
 
@@ -368,8 +372,10 @@ int db_book_seat(reservation_t * reservation)
 
   code = sqlite3_prepare_v2(db_connection, query, -1, &statement, NULL);
 
-  if(code != SQLITE_OK)
+  if(code != SQLITE_OK) {
+    post_semaphore(DATABASE_SEM);
     return DB_ERROR;
+  }
 
   sqlite3_bind_text(statement, 1, reservation->flight_number, -1, NULL);
   sqlite3_bind_int(statement, 2, reservation->seat_row);
@@ -404,8 +410,10 @@ int db_cancel_seat(reservation_t * reservation)
 
   code = sqlite3_prepare_v2(db_connection, query, -1, &statement, NULL);
 
-  if(code != SQLITE_OK)
+  if(code != SQLITE_OK) {
+    post_semaphore(DATABASE_SEM);
     return DB_ERROR;
+  }
 
   sqlite3_bind_text(statement, 1, reservation->flight_number, -1, NULL);
   sqlite3_bind_int(statement, 2, reservation->seat_row);
