@@ -3,7 +3,7 @@
 
 #define CHILD_SEM 0
 #define DATABASE_SEM 1
-#define MAX_CHILD_PROCESSES 2
+#define MAX_CHILD_PROCESSES 10
 
 int init_socket();
 int bind_to_port(int listener_socket, int port);

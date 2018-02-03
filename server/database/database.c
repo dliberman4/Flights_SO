@@ -22,6 +22,7 @@ int db_open()
   if(code != SQLITE_OK)
     return DB_ERROR;
 
+  /* enable foreign keys */
   sqlite3_db_config(db_connection, SQLITE_DBCONFIG_ENABLE_FKEY, 1, NULL);
   return DB_OK;
 }
