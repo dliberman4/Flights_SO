@@ -4,6 +4,8 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+
+#include "../protocol/protocol_constants.h"
 #include "constants.h"
 #include "frontend/frontend.h"
 #include "actions/actions.h"

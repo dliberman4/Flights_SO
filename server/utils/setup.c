@@ -9,6 +9,7 @@
 #include <sys/wait.h>
 #include <netinet/in.h>
 
+#include "../../protocol/protocol_constants.h"
 #include "../log/log.h"
 #include "../constants.h"
 #include "utils.h"

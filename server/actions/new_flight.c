@@ -6,6 +6,7 @@
 #include "../../protocol/serializer.h"
 #include "../log/log.h"
 #include "../constants.h"
+#include "../utils/utils.h"
 
 int new_flight(int accepted_socket, msg_t msg)
 {
@@ -21,8 +22,10 @@ int new_flight(int accepted_socket, msg_t msg)
     print_error_msg("Al abrir la db");
     return ERROR;
   }
-
+  
+  wait_semaphore(DATABASE_SEM);
   code = db_new_flight(flight.flight_number, flight.dim[0], flight.dim[1]);
+  post_semaphore(DATABASE_SEM);
 
   if(code < 0)
     msg.type = RESPONSE_ERROR;

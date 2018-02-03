@@ -6,6 +6,7 @@
 #include "../../protocol/serializer.h"
 #include "../log/log.h"
 #include "../constants.h"
+#include "../utils/utils.h"
 
 int book_seat(int accepted_socket, msg_t msg)
 {
@@ -22,7 +23,9 @@ int book_seat(int accepted_socket, msg_t msg)
     return ERROR;
   }
 
+  wait_semaphore(DATABASE_SEM);
   code = db_book_seat(&reservation);
+  post_semaphore(DATABASE_SEM);
 
   if(code < 0)
     msg.type = RESPONSE_ERROR;
