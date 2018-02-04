@@ -33,9 +33,9 @@ int show_menu()
   int code;
 
   printf("---------------------------------\n");
-  printf(BLUE_COLOR"1:"DEFAULT_COLOR" Obtener el estado de vuelo.\n"
-  BLUE_COLOR"2:"DEFAULT_COLOR" Reservar asiento.\n"
-  BLUE_COLOR"3:"DEFAULT_COLOR" Cancelar reserva de asiento.\n"
+  printf(BLUE_COLOR"1:"DEFAULT_COLOR" Obtener el estado de vuelo\n"
+  BLUE_COLOR"2:"DEFAULT_COLOR" Reservar asiento\n"
+  BLUE_COLOR"3:"DEFAULT_COLOR" Cancelar reserva de asiento\n"
   BLUE_COLOR"4:"DEFAULT_COLOR" Crear nuevo vuelo\n"
   BLUE_COLOR"5:"DEFAULT_COLOR" Eliminar un vuelo\n"
   BLUE_COLOR"6:"DEFAULT_COLOR" Obtener reservas\n"

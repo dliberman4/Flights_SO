@@ -107,26 +107,26 @@ void test_reservation_array()
 
   if(strcmp(value[0].flight_number, des_value[0].flight_number) != 0 ||
       strcmp(value[1].flight_number, des_value[1].flight_number) != 0) {
-    printf("reservation not working :( (flight_number)\n");
+    printf("reservation_array not working :( (flight_number)\n");
     ok = 0;
   }
   if(value[0].seat_row != des_value[0].seat_row ||
       value[1].seat_row != des_value[1].seat_row) {
-    printf("reservation not working :( (seat_row)\n");
+    printf("reservation_array not working :( (seat_row)\n");
     ok = 0;
   }
   if(value[0].seat_col != des_value[0].seat_col ||
       value[1].seat_col != des_value[1].seat_col) {
-    printf("reservation not working :( (seat_col)\n");
+    printf("reservation_array not working :( (seat_col)\n");
     ok = 0;
   }
   if(value[0].dni != des_value[0].dni ||
       value[1].dni != des_value[1].dni) {
-    printf("reservation not working :( (dni)\n");
+    printf("reservation_array not working :( (dni)\n");
     ok = 0;
   }
   if(ok)
-    printf("reservation OK!\n");
+    printf("reservation_array OK!\n");
 }
 
 void test_flight()

@@ -27,7 +27,6 @@ int get_flight_state(int accepted_socket, msg_t msg)
   }
   code = db_get_flight_dim(flight.flight_number, flight.dim);
   if(code < 0) {
-    print_error_msg("Al pedir las dimensiones");
     msg.type = RESPONSE_ERROR;
     msg.bytes = 0;
     bytes = send_msg(accepted_socket, msg);
